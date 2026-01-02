@@ -1,0 +1,942 @@
+/* Variables de colores - Paleta Néboa */
+:root {
+  --color-dark: #4a4a4a;
+  --color-darker: #3a3a3a;
+  --color-darkest: #2a2a2a;
+  --color-beige: #c4b5a4;
+  --color-beige-light: #d4c5b4;
+  --color-white: #ffffff;
+  --color-text: #333333;
+  --font-decorative: 'Brush Script MT', cursive;
+  --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#root {
+  margin: 0;
+  padding: 0;
+}
+
+/* ==================== NAVBAR ==================== */
+.navbar {
+  background-color: var(--color-dark);
+  padding: 0.8rem 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+
+.nav-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+}
+
+.nav-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.nav-logo img {
+  height: 40px;
+  width: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.nav-logo span {
+  color: var(--color-white);
+  font-size: 1.2rem;
+  font-weight: 500;
+}
+
+.nav-menu {
+  display: flex;
+  gap: 2rem;
+}
+
+.nav-link {
+  color: var(--color-white);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background-color: var(--color-beige);
+  transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+  width: 100%;
+}
+
+.nav-link:hover {
+  color: var(--color-beige);
+}
+
+.nav-social {
+  display: flex;
+  gap: 1rem;
+}
+
+.social-icon {
+  color: var(--color-white);
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  padding: 5px;
+}
+
+.social-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
+.social-icon:hover {
+  color: var(--color-beige);
+  transform: scale(1.1);
+}
+
+.social-icon.whatsapp:hover {
+  color: #25D366;
+}
+
+.hamburger {
+  display: none;
+  flex-direction: column;
+  cursor: pointer;
+  z-index: 1001;
+}
+
+.hamburger span {
+  width: 28px;
+  height: 3px;
+  background-color: var(--color-white);
+  margin: 4px 0;
+  transition: 0.3s;
+  border-radius: 2px;
+}
+
+/* ==================== HERO SECTION ==================== */
+.hero {
+  height: 100vh;
+  background: linear-gradient(135deg, var(--color-darker) 0%, var(--color-dark) 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90" opacity="0.03">🍽️</text></svg>') repeat;
+  opacity: 0.1;
+}
+
+.hero-content {
+  text-align: center;
+  z-index: 1;
+}
+
+.hero-logo {
+  width: 300px;
+  height: 300px;
+  object-fit: contain;
+  border: 3px solid rgba(255,255,255,0.3);
+  padding: 20px;
+  background: rgba(0,0,0,0.2);
+  animation: fadeInUp 1s ease;
+}
+
+.hero-subtitle {
+  color: var(--color-white);
+  font-size: 1.5rem;
+  letter-spacing: 8px;
+  margin-top: 20px;
+  animation: fadeInUp 1s ease 0.3s backwards;
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ==================== BIENVENIDA ==================== */
+.bienvenida {
+  background-color: var(--color-beige);
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.bienvenida h2 {
+  font-family: var(--font-decorative);
+  font-size: 2.8rem;
+  color: var(--color-dark);
+  margin-bottom: 30px;
+  font-weight: normal;
+}
+
+.bienvenida p {
+  max-width: 900px;
+  margin: 0 auto 40px;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--color-text);
+}
+
+.bienvenida em {
+  font-style: italic;
+  color: var(--color-darker);
+}
+
+.btn-reserva {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--color-dark);
+  color: var(--color-white);
+  padding: 15px 30px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-reserva:hover {
+  background-color: var(--color-darkest);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.btn-reserva .arrow {
+  font-size: 0.7rem;
+}
+
+/* ==================== CARTA SECTION ==================== */
+.carta-section {
+  background-color: var(--color-dark);
+  padding: 60px 20px;
+}
+
+.carta-section h2 {
+  text-align: center;
+  font-family: var(--font-decorative);
+  font-size: 2.5rem;
+  color: var(--color-white);
+  margin-bottom: 50px;
+  font-weight: normal;
+}
+
+.carta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 1200px;
+  margin: 0 auto 30px;
+  gap: 0;
+}
+
+.carta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.carta-item:hover {
+  transform: translateY(-5px);
+}
+
+.carta-header {
+  font-family: var(--font-decorative);
+  font-size: 1.8rem;
+  color: var(--color-white);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.carta-image {
+  width: 100%;
+  max-width: 350px;
+  height: 250px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  transition: all 0.4s ease;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.carta-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.carta-image.spritz {
+  background: linear-gradient(135deg, var(--color-beige) 0%, var(--color-beige-light) 100%);
+}
+
+.carta-btn {
+  background-color: var(--color-darker);
+  color: var(--color-white);
+  padding: 12px 30px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+}
+
+.carta-btn:hover {
+  background-color: var(--color-darkest);
+  border-color: var(--color-beige);
+  transform: translateY(-2px);
+}
+
+/* ==================== GALERÍA / CARRUSELES ==================== */
+.galeria-section {
+  padding: 60px 20px;
+  background-color: var(--color-beige);
+}
+
+.galeria-section.alt {
+  background-color: var(--color-beige-light);
+}
+
+.galeria-section h2 {
+  text-align: center;
+  font-family: var(--font-decorative);
+  font-size: 2.5rem;
+  color: var(--color-dark);
+  margin-bottom: 40px;
+  font-weight: normal;
+}
+
+.carrusel {
+  max-width: 900px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.carrusel-container {
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+.carrusel-slide {
+  min-width: 100%;
+  height: 500px;
+}
+
+.carrusel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carrusel-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  background-color: rgba(255,255,255,0.5);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  background-color: var(--color-white);
+  transform: scale(1.2);
+}
+
+.dot:hover {
+  background-color: var(--color-white);
+}
+
+/* ==================== EVENTOS ==================== */
+.eventos-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 500px;
+}
+
+.eventos-image {
+  background-size: cover;
+  background-position: center;
+}
+
+.eventos-content {
+  background-color: var(--color-beige);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+  text-align: center;
+}
+
+.eventos-content h2 {
+  font-family: var(--font-decorative);
+  font-size: 3rem;
+  color: var(--color-dark);
+  margin-bottom: 20px;
+  font-weight: normal;
+}
+
+.eventos-content p {
+  font-size: 1.1rem;
+  color: var(--color-text);
+  margin-bottom: 30px;
+  max-width: 400px;
+}
+
+.eventos-btn {
+  background-color: var(--color-dark);
+  color: var(--color-white);
+  padding: 15px 40px;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.eventos-btn:hover {
+  background-color: var(--color-darkest);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* ==================== RESERVAS ==================== */
+.reservas-section {
+  background-color: var(--color-darker);
+  padding: 80px 20px;
+}
+
+.reservas-container {
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: var(--color-dark);
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.reservas-container h2 {
+  font-family: var(--font-decorative);
+  font-size: 2rem;
+  color: var(--color-white);
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  font-weight: normal;
+}
+
+.reserva-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: var(--color-beige);
+  font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select {
+  padding: 12px 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  background-color: var(--color-white);
+  color: var(--color-text);
+  transition: all 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(196, 181, 164, 0.5);
+}
+
+.form-group select:disabled {
+  background-color: #e0e0e0;
+  cursor: not-allowed;
+}
+
+.error-msg {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+.reserva-btn {
+  background-color: var(--color-beige);
+  color: var(--color-dark);
+  padding: 15px 30px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.reserva-btn:hover {
+  background-color: var(--color-beige-light);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.mensaje-reserva {
+  text-align: center;
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 15px;
+  font-size: 0.95rem;
+}
+
+.reserva-note {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.85rem;
+  margin-top: 20px;
+  line-height: 1.6;
+}
+
+/* ==================== SOBRE NOSOTROS ==================== */
+.nosotros-section {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  min-height: 600px;
+  background-color: var(--color-dark);
+}
+
+.nosotros-images {
+  display: flex;
+  flex-direction: column;
+}
+
+.nosotros-images img {
+  flex: 1;
+  object-fit: cover;
+  width: 100%;
+}
+
+.nosotros-content {
+  padding: 60px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.nosotros-content h2 {
+  font-family: var(--font-decorative);
+  font-size: 2.5rem;
+  color: var(--color-white);
+  margin-bottom: 30px;
+  font-weight: normal;
+}
+
+.nosotros-content p {
+  color: rgba(255,255,255,0.85);
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 20px;
+}
+
+/* ==================== EQUIPO ==================== */
+.equipo-section {
+  background-color: var(--color-darkest);
+  padding: 60px 20px;
+}
+
+.equipo-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 50px;
+}
+
+.equipo-img {
+  width: 400px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.equipo-text {
+  flex: 1;
+}
+
+.equipo-text h3 {
+  font-family: var(--font-decorative);
+  font-size: 2rem;
+  color: var(--color-white);
+  margin-bottom: 20px;
+  font-weight: normal;
+}
+
+.equipo-text p {
+  color: rgba(255,255,255,0.85);
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 15px;
+}
+
+.equipo-text em {
+  color: var(--color-beige);
+  font-style: italic;
+}
+
+/* ==================== HORARIO ==================== */
+.horario-section {
+  background: linear-gradient(rgba(74,74,74,0.9), rgba(74,74,74,0.9)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90" opacity="0.1">🍷</text></svg>');
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.horario-section h2 {
+  font-size: 2.5rem;
+  color: var(--color-white);
+  margin-bottom: 40px;
+}
+
+.horario-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  overflow-x: auto;
+}
+
+.horario-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: rgba(255,255,255,0.95);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.horario-table th,
+.horario-table td {
+  padding: 15px 10px;
+  text-align: center;
+  border: 1px solid #ddd;
+  font-size: 0.9rem;
+}
+
+.horario-table th {
+  background-color: var(--color-dark);
+  color: var(--color-white);
+  font-weight: 600;
+}
+
+.horario-table .label {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  text-align: left;
+  padding-left: 15px;
+}
+
+.horario-table .cerrado {
+  background-color: var(--color-dark);
+}
+
+.horario-telefono {
+  margin-top: 30px;
+  font-size: 1.3rem;
+  color: var(--color-white);
+}
+
+.horario-telefono a {
+  color: var(--color-beige);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.horario-telefono a:hover {
+  text-decoration: underline;
+}
+
+/* ==================== FOOTER ==================== */
+.footer {
+  background-color: var(--color-darkest);
+  padding: 60px 20px 30px;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.footer-logo {
+  text-align: center;
+}
+
+.footer-logo img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 15px;
+}
+
+.footer-logo p {
+  color: var(--color-white);
+  letter-spacing: 5px;
+  font-size: 0.9rem;
+}
+
+.footer-info h3,
+.footer-social h3 {
+  color: var(--color-beige);
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.footer-info p {
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+.footer-info a {
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-info a:hover {
+  color: var(--color-beige);
+}
+
+.social-links {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.social-links a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.social-links a svg {
+  width: 24px;
+  height: 24px;
+}
+
+.social-links a:hover {
+  color: var(--color-beige);
+  transform: translateX(5px);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: 30px;
+}
+
+.footer-bottom p {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.85rem;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+  .carta-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .eventos-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .eventos-image {
+    height: 300px;
+  }
+  
+  .nosotros-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .nosotros-images {
+    flex-direction: row;
+    height: 300px;
+  }
+  
+  .equipo-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .equipo-img {
+    width: 100%;
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 1rem 0;
+  }
+  
+  .nav-logo span {
+    display: none;
+  }
+  
+  .nav-menu {
+    display: none;
+    position: fixed;
+    top: 60px;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    flex-direction: column;
+    background-color: var(--color-dark);
+    gap: 0;
+    padding: 2rem 0;
+    text-align: center;
+  }
+
+  .nav-menu.active {
+    display: flex;
+  }
+
+  .nav-link {
+    padding: 1.2rem;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+    font-size: 1.1rem;
+  }
+  
+  .nav-social {
+    display: none;
+  }
+
+  .hamburger {
+    display: flex;
+  }
+  
+  .hero-logo {
+    width: 200px;
+    height: 200px;
+  }
+  
+  .hero-subtitle {
+    font-size: 1rem;
+    letter-spacing: 4px;
+  }
+  
+  .bienvenida h2,
+  .galeria-section h2,
+  .eventos-content h2,
+  .nosotros-content h2 {
+    font-size: 2rem;
+  }
+  
+  .carta-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .carta-image {
+    height: 200px;
+  }
+  
+  .carrusel-slide {
+    height: 300px;
+  }
+  
+  .footer-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .social-links {
+    align-items: center;
+  }
+  
+  .horario-table {
+    font-size: 0.75rem;
+  }
+  
+  .horario-table th,
+  .horario-table td {
+    padding: 8px 5px;
+  }
+}
+
+@media (max-width: 480px) {
+  .reservas-container {
+    padding: 25px;
+  }
+  
+  .reservas-container h2 {
+    font-size: 1.5rem;
+  }
+  
+  .nosotros-content {
+    padding: 30px;
+  }
+  
+  .equipo-content {
+    padding: 0;
+  }
+  
+  .equipo-img {
+    height: 250px;
+  }
+}
