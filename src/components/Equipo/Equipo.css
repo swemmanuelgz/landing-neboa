@@ -1,0 +1,68 @@
+/* ==================== EQUIPO ==================== */
+.equipo-section {
+  background-color: var(--color-darkest);
+  padding: 60px 20px;
+}
+
+.equipo-content {
+  max-width: 1000px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 50px;
+}
+
+.equipo-img {
+  width: 400px;
+  height: 300px;
+  object-fit: cover;
+  border-radius: 10px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.equipo-text {
+  flex: 1;
+}
+
+.equipo-text h3 {
+  font-family: var(--font-decorative);
+  font-size: 2rem;
+  color: var(--color-white);
+  margin-bottom: 20px;
+  font-weight: normal;
+}
+
+.equipo-text p {
+  color: rgba(255,255,255,0.85);
+  font-size: 1rem;
+  line-height: 1.8;
+  margin-bottom: 15px;
+}
+
+.equipo-text em {
+  color: var(--color-beige);
+  font-style: italic;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+  .equipo-content {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .equipo-img {
+    width: 100%;
+    max-width: 500px;
+  }
+}
+
+@media (max-width: 480px) {
+  .equipo-content {
+    padding: 0;
+  }
+  
+  .equipo-img {
+    height: 250px;
+  }
+}

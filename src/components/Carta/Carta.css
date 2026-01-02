@@ -1,0 +1,97 @@
+/* ==================== CARTA SECTION ==================== */
+.carta-section {
+  background-color: var(--color-dark);
+  padding: 60px 20px;
+}
+
+.carta-section h2 {
+  text-align: center;
+  font-family: var(--font-decorative);
+  font-size: 2.5rem;
+  color: var(--color-white);
+  margin-bottom: 50px;
+  font-weight: normal;
+}
+
+.carta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  max-width: 1200px;
+  margin: 0 auto 30px;
+  gap: 0;
+}
+
+.carta-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px;
+  transition: all 0.3s ease;
+}
+
+.carta-item:hover {
+  transform: translateY(-5px);
+}
+
+.carta-header {
+  font-family: var(--font-decorative);
+  font-size: 1.8rem;
+  color: var(--color-white);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.carta-image {
+  width: 100%;
+  max-width: 350px;
+  height: 250px;
+  background-size: cover;
+  background-position: center;
+  border-radius: 5px;
+  margin-bottom: 20px;
+  transition: all 0.4s ease;
+  box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.carta-image:hover {
+  transform: scale(1.05);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+.carta-image.spritz {
+  background: linear-gradient(135deg, var(--color-beige) 0%, var(--color-beige-light) 100%);
+}
+
+.carta-btn {
+  background-color: var(--color-darker);
+  color: var(--color-white);
+  padding: 12px 30px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  transition: all 0.3s ease;
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.carta-btn:hover {
+  background-color: var(--color-darkest);
+  border-color: var(--color-beige);
+  transform: translateY(-2px);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+  .carta-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .carta-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .carta-image {
+    height: 200px;
+  }
+}

@@ -1,0 +1,49 @@
+/* Variables de colores - Paleta Néboa */
+:root {
+  --color-dark: #4a4a4a;
+  --color-darker: #3a3a3a;
+  --color-darkest: #2a2a2a;
+  --color-beige: #c4b5a4;
+  --color-beige-light: #d4c5b4;
+  --color-white: #ffffff;
+  --color-text: #333333;
+  --font-decorative: 'Brush Script MT', cursive;
+  --font-main: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+#root {
+  margin: 0;
+  padding: 0;
+}
+
+/* Animaciones globales */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

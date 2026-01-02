@@ -1,0 +1,78 @@
+/* ==================== HORARIO ==================== */
+.horario-section {
+  background: linear-gradient(rgba(74,74,74,0.9), rgba(74,74,74,0.9)), url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90" opacity="0.1">🍷</text></svg>');
+  padding: 60px 20px;
+  text-align: center;
+}
+
+.horario-section h2 {
+  font-size: 2.5rem;
+  color: var(--color-white);
+  margin-bottom: 40px;
+}
+
+.horario-container {
+  max-width: 1100px;
+  margin: 0 auto;
+  overflow-x: auto;
+}
+
+.horario-table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: rgba(255,255,255,0.95);
+  box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+}
+
+.horario-table th,
+.horario-table td {
+  padding: 15px 10px;
+  text-align: center;
+  border: 1px solid #ddd;
+  font-size: 0.9rem;
+}
+
+.horario-table th {
+  background-color: var(--color-dark);
+  color: var(--color-white);
+  font-weight: 600;
+}
+
+.horario-table .label {
+  background-color: #f5f5f5;
+  font-weight: 600;
+  text-align: left;
+  padding-left: 15px;
+}
+
+.horario-table .cerrado {
+  background-color: var(--color-dark);
+}
+
+.horario-telefono {
+  margin-top: 30px;
+  font-size: 1.3rem;
+  color: var(--color-white);
+}
+
+.horario-telefono a {
+  color: var(--color-beige);
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.horario-telefono a:hover {
+  text-decoration: underline;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .horario-table {
+    font-size: 0.75rem;
+  }
+  
+  .horario-table th,
+  .horario-table td {
+    padding: 8px 5px;
+  }
+}

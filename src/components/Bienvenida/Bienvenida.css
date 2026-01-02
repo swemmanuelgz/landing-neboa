@@ -1,0 +1,59 @@
+/* ==================== BIENVENIDA ==================== */
+.bienvenida {
+  background-color: var(--color-beige);
+  padding: 80px 20px;
+  text-align: center;
+}
+
+.bienvenida h2 {
+  font-family: var(--font-decorative);
+  font-size: 2.8rem;
+  color: var(--color-dark);
+  margin-bottom: 30px;
+  font-weight: normal;
+}
+
+.bienvenida p {
+  max-width: 900px;
+  margin: 0 auto 40px;
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--color-text);
+}
+
+.bienvenida em {
+  font-style: italic;
+  color: var(--color-darker);
+}
+
+.btn-reserva {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  background-color: var(--color-dark);
+  color: var(--color-white);
+  padding: 15px 30px;
+  text-decoration: none;
+  font-size: 0.9rem;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-reserva:hover {
+  background-color: var(--color-darkest);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.btn-reserva .arrow {
+  font-size: 0.7rem;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .bienvenida h2 {
+    font-size: 2rem;
+  }
+}
