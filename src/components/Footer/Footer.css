@@ -1,0 +1,103 @@
+/* ==================== FOOTER ==================== */
+.footer {
+  background-color: var(--color-darkest);
+  padding: 60px 20px 30px;
+}
+
+.footer-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.footer-logo {
+  text-align: center;
+}
+
+.footer-logo img {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 15px;
+}
+
+.footer-logo p {
+  color: var(--color-white);
+  letter-spacing: 5px;
+  font-size: 0.9rem;
+}
+
+.footer-info h3,
+.footer-social h3 {
+  color: var(--color-beige);
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.footer-info p {
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+.footer-info a {
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.footer-info a:hover {
+  color: var(--color-beige);
+}
+
+.social-links {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.social-links a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: rgba(255,255,255,0.8);
+  text-decoration: none;
+  transition: all 0.3s ease;
+}
+
+.social-links a svg {
+  width: 24px;
+  height: 24px;
+}
+
+.social-links a:hover {
+  color: var(--color-beige);
+  transform: translateX(5px);
+}
+
+.footer-bottom {
+  text-align: center;
+  padding-top: 30px;
+}
+
+.footer-bottom p {
+  color: rgba(255,255,255,0.5);
+  font-size: 0.85rem;
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .footer-content {
+    grid-template-columns: 1fr;
+    text-align: center;
+  }
+  
+  .social-links {
+    align-items: center;
+  }
+}

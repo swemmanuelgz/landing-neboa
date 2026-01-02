@@ -1,0 +1,68 @@
+/* ==================== EVENTOS ==================== */
+.eventos-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  min-height: 500px;
+}
+
+.eventos-image {
+  background-size: cover;
+  background-position: center;
+}
+
+.eventos-content {
+  background-color: var(--color-beige);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 60px;
+  text-align: center;
+}
+
+.eventos-content h2 {
+  font-family: var(--font-decorative);
+  font-size: 3rem;
+  color: var(--color-dark);
+  margin-bottom: 20px;
+  font-weight: normal;
+}
+
+.eventos-content p {
+  font-size: 1.1rem;
+  color: var(--color-text);
+  margin-bottom: 30px;
+  max-width: 400px;
+}
+
+.eventos-btn {
+  background-color: var(--color-dark);
+  color: var(--color-white);
+  padding: 15px 40px;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.eventos-btn:hover {
+  background-color: var(--color-darkest);
+  transform: translateY(-3px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 1024px) {
+  .eventos-section {
+    grid-template-columns: 1fr;
+  }
+  
+  .eventos-image {
+    height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .eventos-content h2 {
+    font-size: 2rem;
+  }
+}

@@ -1,0 +1,81 @@
+/* ==================== GALERÍA / CARRUSELES ==================== */
+.galeria-section {
+  padding: 60px 20px;
+  background-color: var(--color-beige);
+}
+
+.galeria-section.alt {
+  background-color: var(--color-beige-light);
+}
+
+.galeria-section h2 {
+  text-align: center;
+  font-family: var(--font-decorative);
+  font-size: 2.5rem;
+  color: var(--color-dark);
+  margin-bottom: 40px;
+  font-weight: normal;
+}
+
+.carrusel {
+  max-width: 900px;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+  position: relative;
+}
+
+.carrusel-container {
+  display: flex;
+  transition: transform 0.5s ease;
+}
+
+.carrusel-slide {
+  min-width: 100%;
+  height: 500px;
+}
+
+.carrusel-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.carrusel-dots {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 10px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  background-color: rgba(255,255,255,0.5);
+  border-radius: 50%;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  background-color: var(--color-white);
+  transform: scale(1.2);
+}
+
+.dot:hover {
+  background-color: var(--color-white);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 768px) {
+  .galeria-section h2 {
+    font-size: 2rem;
+  }
+  
+  .carrusel-slide {
+    height: 300px;
+  }
+}

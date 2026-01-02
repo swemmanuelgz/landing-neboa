@@ -1,0 +1,481 @@
+/* ==================== RESERVAS ==================== */
+.reservas-section {
+  background-color: var(--color-darker);
+  padding: 80px 20px;
+}
+
+.reservas-container {
+  max-width: 600px;
+  margin: 0 auto;
+  background-color: var(--color-dark);
+  padding: 40px;
+  border-radius: 10px;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+}
+
+.reservas-container h2 {
+  font-family: var(--font-decorative);
+  font-size: 2rem;
+  color: var(--color-white);
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid rgba(255,255,255,0.2);
+  font-weight: normal;
+}
+
+.reserva-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  color: var(--color-beige);
+  font-size: 0.95rem;
+}
+
+.form-group input,
+.form-group select {
+  padding: 12px 15px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  background-color: var(--color-white);
+  color: var(--color-text);
+  transition: all 0.3s ease;
+}
+
+/* Estilos específicos para input de fecha */
+.form-group input[type="date"] {
+  position: relative;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+/* Ocultar el ícono del calendario en algunos navegadores */
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+  background: transparent;
+  bottom: 0;
+  color: transparent;
+  cursor: pointer;
+  height: auto;
+  left: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: auto;
+}
+
+/* Mejorar la apariencia del date picker */
+.form-group input[type="date"]::-webkit-datetime-edit {
+  padding: 0;
+}
+
+.form-group input[type="date"]::-webkit-datetime-edit-fields-wrapper {
+  padding: 0;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(196, 181, 164, 0.5);
+}
+
+.form-group select:disabled {
+  background-color: #e0e0e0;
+  cursor: not-allowed;
+}
+
+/* ==================== PHONE INPUT PERSONALIZADO ==================== */
+.phone-input-container {
+  width: 100%;
+}
+
+.phone-input-container .phone-input-field {
+  width: 100% !important;
+  height: 45px !important;
+  font-size: 1rem !important;
+  border: none !important;
+  border-radius: 5px !important;
+  padding-left: 55px !important;
+  background-color: var(--color-white) !important;
+  color: var(--color-text) !important;
+  transition: all 0.3s ease !important;
+}
+
+.phone-input-container .phone-input-field:focus {
+  outline: none !important;
+  box-shadow: 0 0 0 3px rgba(196, 181, 164, 0.5) !important;
+}
+
+.phone-input-container .phone-input-button {
+  background-color: var(--color-white) !important;
+  border: none !important;
+  border-radius: 5px 0 0 5px !important;
+  height: 45px !important;
+  transition: background-color 0.3s ease !important;
+}
+
+.phone-input-container .phone-input-button:hover {
+  background-color: #f5f5f5 !important;
+}
+
+.phone-input-container .flag-dropdown {
+  border: none !important;
+  background-color: transparent !important;
+}
+
+.phone-input-dropdown {
+  background-color: var(--color-white) !important;
+  border: 1px solid #ddd !important;
+  border-radius: 5px !important;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2) !important;
+  max-height: 250px !important;
+}
+
+.phone-input-dropdown .search {
+  background-color: #f9f9f9 !important;
+  padding: 10px !important;
+  border-bottom: 1px solid #ddd !important;
+}
+
+.phone-input-search {
+  width: 100% !important;
+  padding: 8px 12px !important;
+  border: 1px solid #ddd !important;
+  border-radius: 4px !important;
+  font-size: 0.9rem !important;
+}
+
+.phone-input-dropdown .country {
+  padding: 10px 15px !important;
+  transition: background-color 0.2s ease !important;
+}
+
+.phone-input-dropdown .country:hover {
+  background-color: var(--color-beige-light) !important;
+}
+
+.phone-input-dropdown .country.highlight {
+  background-color: var(--color-beige) !important;
+}
+
+.phone-input-dropdown .country-name {
+  color: var(--color-text) !important;
+  font-size: 0.9rem !important;
+}
+
+.phone-input-dropdown .dial-code {
+  color: #666 !important;
+  font-size: 0.85rem !important;
+}
+
+.error-msg {
+  color: #ff6b6b;
+  font-size: 0.85rem;
+  margin-top: 5px;
+}
+
+.fecha-info {
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8rem;
+  margin-top: 5px;
+  font-style: italic;
+}
+
+.reserva-btn {
+  background-color: var(--color-beige);
+  color: var(--color-dark);
+  padding: 15px 30px;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 10px;
+}
+
+.reserva-btn:hover {
+  background-color: var(--color-beige-light);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.reserva-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* ==================== MENSAJES DE ESTADO ==================== */
+.mensaje-reserva {
+  text-align: center;
+  padding: 15px;
+  border-radius: 5px;
+  margin-top: 15px;
+  font-size: 0.95rem;
+}
+
+.mensaje-reserva.loading {
+  background-color: rgba(255, 193, 7, 0.2);
+  color: #ffc107;
+}
+
+.mensaje-reserva.success {
+  background-color: rgba(76, 175, 80, 0.2);
+  color: #4caf50;
+}
+
+.mensaje-reserva.alternatives {
+  background-color: rgba(255, 152, 0, 0.2);
+  color: #ff9800;
+}
+
+.mensaje-reserva.full,
+.mensaje-reserva.error {
+  background-color: rgba(244, 67, 54, 0.2);
+  color: #f44336;
+}
+
+/* ==================== ALTERNATIVAS DE HORARIO ==================== */
+.alternativas-container {
+  margin-top: 20px;
+  padding: 20px;
+  background-color: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+  border: 1px solid var(--color-beige);
+}
+
+.alternativas-titulo {
+  color: var(--color-beige);
+  font-weight: bold;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.alternativas-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+
+.alternativa-btn {
+  background-color: transparent;
+  border: 2px solid var(--color-beige);
+  color: var(--color-white);
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+}
+
+.alternativa-btn:hover {
+  background-color: var(--color-beige);
+  color: var(--color-darkest);
+  transform: scale(1.05);
+}
+
+.reserva-id {
+  text-align: center;
+  color: var(--color-beige);
+  margin-top: 10px;
+  font-size: 0.9rem;
+}
+
+.reserva-note {
+  color: rgba(255,255,255,0.7);
+  font-size: 0.85rem;
+  margin-top: 20px;
+  line-height: 1.6;
+}
+
+/* ==================== MODAL DE CONFIRMACIÓN ==================== */
+.confirm-modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.confirm-modal {
+  background-color: var(--color-dark);
+  border-radius: 15px;
+  width: 100%;
+  max-width: 450px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease-in-out;
+  overflow: hidden;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.confirm-modal-header {
+  background-color: var(--color-beige);
+  color: var(--color-darkest);
+  padding: 20px 25px;
+  text-align: center;
+}
+
+.confirm-modal-header h3 {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.confirm-modal-body {
+  padding: 30px 25px;
+}
+
+.confirm-question {
+  text-align: center;
+  color: var(--color-white);
+  font-size: 1.2rem;
+  margin-bottom: 25px;
+  font-weight: 500;
+}
+
+.confirm-details {
+  background-color: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 20px;
+}
+
+.confirm-detail {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.confirm-detail:last-child {
+  border-bottom: none;
+}
+
+.detail-icon {
+  font-size: 1.3rem;
+  width: 30px;
+  text-align: center;
+}
+
+.detail-text {
+  color: var(--color-white);
+  font-size: 1rem;
+  flex: 1;
+}
+
+.confirm-modal-footer {
+  display: flex;
+  gap: 15px;
+  padding: 20px 25px 25px;
+}
+
+.confirm-btn {
+  flex: 1;
+  padding: 15px 20px;
+  border: none;
+  border-radius: 8px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.confirm-btn.cancel {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: var(--color-white);
+  border: 2px solid rgba(255, 255, 255, 0.3);
+}
+
+.confirm-btn.cancel:hover {
+  background-color: rgba(244, 67, 54, 0.2);
+  border-color: #f44336;
+  color: #f44336;
+}
+
+.confirm-btn.accept {
+  background-color: var(--color-beige);
+  color: var(--color-darkest);
+}
+
+.confirm-btn.accept:hover {
+  background-color: var(--color-beige-light);
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* ==================== RESPONSIVE ==================== */
+@media (max-width: 480px) {
+  .reservas-container {
+    padding: 25px;
+  }
+  
+  .reservas-container h2 {
+    font-size: 1.5rem;
+  }
+
+  .confirm-modal {
+    max-width: 100%;
+    margin: 10px;
+  }
+
+  .confirm-modal-header {
+    padding: 15px 20px;
+  }
+
+  .confirm-modal-header h3 {
+    font-size: 1.3rem;
+  }
+
+  .confirm-modal-body {
+    padding: 20px;
+  }
+
+  .confirm-question {
+    font-size: 1.1rem;
+  }
+
+  .confirm-modal-footer {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .confirm-btn {
+    padding: 14px;
+  }
+}
