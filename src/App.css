@@ -940,3 +940,141 @@
     height: 250px;
   }
 }
+
+/* ==================== MODAL DE PDF ==================== */
+.pdf-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.85);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.pdf-modal-content {
+  background-color: var(--color-white);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 1200px;
+  height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  animation: slideUp 0.3s ease-in-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(50px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.pdf-modal-header {
+  background-color: var(--color-dark);
+  color: var(--color-white);
+  padding: 1.2rem 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-radius: 12px 12px 0 0;
+}
+
+.pdf-modal-header h3 {
+  margin: 0;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: 1px;
+}
+
+.close-pdf-modal {
+  background: none;
+  border: none;
+  color: var(--color-white);
+  font-size: 1.8rem;
+  cursor: pointer;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.3s ease;
+}
+
+.close-pdf-modal:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  transform: rotate(90deg);
+}
+
+.pdf-viewer {
+  flex: 1;
+  border: none;
+  border-radius: 0 0 12px 12px;
+  width: 100%;
+}
+
+/* Responsive para modal de PDF */
+@media (max-width: 768px) {
+  .pdf-modal {
+    padding: 10px;
+  }
+  
+  .pdf-modal-content {
+    height: 85vh;
+    max-width: 100%;
+  }
+  
+  .pdf-modal-header {
+    padding: 1rem;
+  }
+  
+  .pdf-modal-header h3 {
+    font-size: 1.1rem;
+  }
+  
+  .close-pdf-modal {
+    font-size: 1.5rem;
+    width: 35px;
+    height: 35px;
+  }
+}
+
+@media (max-width: 480px) {
+  .pdf-modal-content {
+    height: 80vh;
+    border-radius: 8px;
+  }
+  
+  .pdf-modal-header {
+    padding: 0.8rem;
+    border-radius: 8px 8px 0 0;
+  }
+  
+  .pdf-modal-header h3 {
+    font-size: 1rem;
+  }
+  
+  .pdf-viewer {
+    border-radius: 0 0 8px 8px;
+  }
+}

@@ -31,6 +31,9 @@ function App() {
   const [currentSlide2, setCurrentSlide2] = useState(0)
   const [currentSlide3, setCurrentSlide3] = useState(0)
   
+  // Modal de PDF
+  const [pdfModal, setPdfModal] = useState({ isOpen: false, pdfUrl: '', title: '' })
+  
   // Formulario de reservas
   const [reserva, setReserva] = useState({
     nombre: '',
@@ -133,6 +136,16 @@ function App() {
 
   const closeMenu = () => setMenuOpen(false)
 
+  // Abrir PDF en modal
+  const openPdfModal = (pdfUrl, title) => {
+    setPdfModal({ isOpen: true, pdfUrl, title })
+  }
+
+  // Cerrar modal de PDF
+  const closePdfModal = () => {
+    setPdfModal({ isOpen: false, pdfUrl: '', title: '' })
+  }
+
   return (
     <>
       {/* Navbar */}
@@ -196,46 +209,46 @@ function App() {
           <div className="carta-item">
             <div className="carta-header">NUESTROS DESAYUNOS</div>
             <div className="carta-image" style={{ backgroundImage: `url(${fotoDesayuno})` }}></div>
-            <a href={cartaDesayunos} target="_blank" rel="noopener noreferrer" className="carta-btn">
+            <button onClick={() => openPdfModal(cartaDesayunos, 'Carta de Desayunos')} className="carta-btn">
               Carta de desayunos
-            </a>
+            </button>
           </div>
           <div className="carta-item">
             <div className="carta-header">NUESTRA CARTA</div>
             <div className="carta-image" style={{ backgroundImage: `url(${fotoPlatos})` }}></div>
-            <a href={cartaPrincipal} target="_blank" rel="noopener noreferrer" className="carta-btn">
+            <button onClick={() => openPdfModal(cartaPrincipal, 'Carta Principal')} className="carta-btn">
               Carta principal
-            </a>
+            </button>
           </div>
           <div className="carta-item">
             <div className="carta-header">NUESTRAS TAPAS</div>
             <div className="carta-image" style={{ backgroundImage: `url(${pulpo})` }}></div>
-            <a href={cartaTapeo} target="_blank" rel="noopener noreferrer" className="carta-btn">
+            <button onClick={() => openPdfModal(cartaTapeo, 'Carta de Tapeo')} className="carta-btn">
               Carta de tapeo
-            </a>
+            </button>
           </div>
         </div>
         <div className="carta-grid">
           <div className="carta-item">
             <div className="carta-header">NUESTROS VINOS</div>
             <div className="carta-image" style={{ backgroundImage: `url(${fotoVinos})` }}></div>
-            <a href={cartaVinos} target="_blank" rel="noopener noreferrer" className="carta-btn">
+            <button onClick={() => openPdfModal(cartaVinos, 'Carta de Vinos')} className="carta-btn">
               Carta de vinos
-            </a>
+            </button>
           </div>
           <div className="carta-item">
             <div className="carta-header">NUESTROS SPRITZS</div>
             <div className="carta-image spritz"></div>
-            <a href={cartaCocteleria} target="_blank" rel="noopener noreferrer" className="carta-btn">
+            <button onClick={() => openPdfModal(cartaCocteleria, 'Carta de Spritz')} className="carta-btn">
               Carta de spritz
-            </a>
+            </button>
           </div>
           <div className="carta-item">
             <div className="carta-header">NUESTROS CÓCTELES</div>
             <div className="carta-image" style={{ backgroundImage: `url(${fotoCocteles})` }}></div>
-            <a href={cartaCocteleria} target="_blank" rel="noopener noreferrer" className="carta-btn">
+            <button onClick={() => openPdfModal(cartaCocteleria, 'Carta de Cócteles')} className="carta-btn">
               Carta de coctelería
-            </a>
+            </button>
           </div>
         </div>
       </section>
@@ -548,7 +561,24 @@ function App() {
           <p>&copy; 2025 Restaurante Néboa - Ourense. Todos los derechos reservados.</p>
         </div>
       </footer>
-    </>
+      {/* Modal para visualizar PDFs */}
+      {pdfModal.isOpen && (
+        <div className="pdf-modal" onClick={closePdfModal}>
+          <div className="pdf-modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="pdf-modal-header">
+              <h3>{pdfModal.title}</h3>
+              <button className="close-pdf-modal" onClick={closePdfModal}>
+                ✕
+              </button>
+            </div>
+            <iframe
+              src={pdfModal.pdfUrl}
+              title={pdfModal.title}
+              className="pdf-viewer"
+            />
+          </div>
+        </div>
+      )}    </>
   )
 }
 
