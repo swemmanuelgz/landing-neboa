@@ -11,6 +11,7 @@ export { default as Nosotros } from './Nosotros/Nosotros';
 export { default as Equipo } from './Equipo/Equipo';
 export { default as Horario } from './Horario/Horario';
 export { default as Footer } from './Footer/Footer';
+export { default as ScrollReveal } from './ScrollReveal/ScrollReveal';
 
 // Iconos
 export { InstagramIcon, WhatsAppIcon } from './icons/SocialIcons';

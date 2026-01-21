@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import PdfModal from '../PdfModal/PdfModal'
+import ScrollReveal from '../ScrollReveal/ScrollReveal'
 import './Carta.css'
 
 // Imágenes
@@ -39,33 +40,39 @@ const Carta = () => {
   return (
     <>
       <section id="carta" className="carta-section">
-        <h2>Nuestras Cartas</h2>
+        <ScrollReveal animation="fade-up" delay={0}>
+          <h2>Nuestras Cartas</h2>
+        </ScrollReveal>
         <div className="carta-grid">
           {cartasData.slice(0, 3).map((carta, idx) => (
-            <div key={idx} className="carta-item">
-              <div className="carta-header">{carta.title}</div>
-              <div 
-                className={`carta-image ${carta.className || ''}`} 
-                style={carta.image ? { backgroundImage: `url(${carta.image})` } : {}}
-              ></div>
-              <button onClick={() => openPdfModal(carta.pdf, carta.btnText)} className="carta-btn">
-                {carta.btnText}
-              </button>
-            </div>
+            <ScrollReveal key={idx} animation="zoom-in" delay={idx * 0.1} duration={0.5}>
+              <div className="carta-item">
+                <div className="carta-header">{carta.title}</div>
+                <div 
+                  className={`carta-image ${carta.className || ''}`} 
+                  style={carta.image ? { backgroundImage: `url(${carta.image})` } : {}}
+                ></div>
+                <button onClick={() => openPdfModal(carta.pdf, carta.btnText)} className="carta-btn">
+                  {carta.btnText}
+                </button>
+              </div>
+            </ScrollReveal>
           ))}
         </div>
         <div className="carta-grid">
           {cartasData.slice(3).map((carta, idx) => (
-            <div key={idx} className="carta-item">
-              <div className="carta-header">{carta.title}</div>
-              <div 
-                className={`carta-image ${carta.className || ''}`} 
-                style={carta.image ? { backgroundImage: `url(${carta.image})` } : {}}
-              ></div>
-              <button onClick={() => openPdfModal(carta.pdf, carta.btnText)} className="carta-btn">
-                {carta.btnText}
-              </button>
-            </div>
+            <ScrollReveal key={idx} animation="zoom-in" delay={idx * 0.1} duration={0.5}>
+              <div className="carta-item">
+                <div className="carta-header">{carta.title}</div>
+                <div 
+                  className={`carta-image ${carta.className || ''}`} 
+                  style={carta.image ? { backgroundImage: `url(${carta.image})` } : {}}
+                ></div>
+                <button onClick={() => openPdfModal(carta.pdf, carta.btnText)} className="carta-btn">
+                  {carta.btnText}
+                </button>
+              </div>
+            </ScrollReveal>
           ))}
         </div>
       </section>

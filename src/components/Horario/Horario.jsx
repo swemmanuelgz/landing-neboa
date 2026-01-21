@@ -1,11 +1,15 @@
+import ScrollReveal from '../ScrollReveal/ScrollReveal'
 import './Horario.css'
 
 const Horario = () => {
   return (
     <section className="horario-section">
-      <h2>Horario</h2>
-      <div className="horario-container">
-        <table className="horario-table">
+      <ScrollReveal animation="fade-up">
+        <h2>Horario</h2>
+      </ScrollReveal>
+      <ScrollReveal animation="fade-up" delay={0.2}>
+        <div className="horario-container">
+          <table className="horario-table">
           <thead>
             <tr>
               <th></th>
@@ -82,7 +86,10 @@ const Horario = () => {
           </tbody>
         </table>
       </div>
-      <p className="horario-telefono">📞 Teléfono de reservas: <a href="tel:+34630713713">630 713 713</a></p>
+      </ScrollReveal>
+      <ScrollReveal animation="fade-up" delay={0.3}>
+        <p className="horario-telefono">📞 Teléfono de reservas: <a href="tel:+34630713713">630 713 713</a></p>
+      </ScrollReveal>
     </section>
   )
 }

@@ -14,7 +14,7 @@ const Footer = () => {
           <h3>Contacto</h3>
           <p>📍 Calle Valle Inclán, 21 - Ourense</p>
           <p>📞 <a href="tel:+34630713713">630 713 713</a></p>
-          <p>📧 <a href="mailto:info@neboa.es">info@neboa.es</a></p>
+          <p>📧 <a href="mailto:restauranteneboaourense@gmail.com">restauranteneboaourense@gmail.com</a></p>
         </div>
         <div className="footer-social">
           <h3>Síguenos</h3>

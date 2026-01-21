@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import ScrollReveal from '../ScrollReveal/ScrollReveal'
 import './Galeria.css'
 
 // Imágenes desayunos
@@ -32,25 +33,29 @@ const Carrusel = ({ slides, title, interval = 4000, altPrefix, className = '' })
 
   return (
     <section className={`galeria-section ${className}`}>
-      <h2>{title}</h2>
-      <div className="carrusel">
-        <div className="carrusel-container" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-          {slides.map((img, idx) => (
-            <div key={idx} className="carrusel-slide">
-              <img src={img} alt={`${altPrefix} ${idx + 1}`} />
-            </div>
-          ))}
+      <ScrollReveal animation="fade-up">
+        <h2>{title}</h2>
+      </ScrollReveal>
+      <ScrollReveal animation="fade-up" delay={0.2}>
+        <div className="carrusel">
+          <div className="carrusel-container" style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
+            {slides.map((img, idx) => (
+              <div key={idx} className="carrusel-slide">
+                <img src={img} alt={`${altPrefix} ${idx + 1}`} />
+              </div>
+            ))}
+          </div>
+          <div className="carrusel-dots">
+            {slides.map((_, idx) => (
+              <span 
+                key={idx} 
+                className={`dot ${currentSlide === idx ? 'active' : ''}`}
+                onClick={() => setCurrentSlide(idx)}
+              ></span>
+            ))}
+          </div>
         </div>
-        <div className="carrusel-dots">
-          {slides.map((_, idx) => (
-            <span 
-              key={idx} 
-              className={`dot ${currentSlide === idx ? 'active' : ''}`}
-              onClick={() => setCurrentSlide(idx)}
-            ></span>
-          ))}
-        </div>
-      </div>
+      </ScrollReveal>
     </section>
   )
 }

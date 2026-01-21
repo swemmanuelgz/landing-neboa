@@ -13,6 +13,7 @@
   "dependencies": {
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-intersection-observer": "^10.0.0",
     "react-phone-input-2": "^2.15.1",
     "sweetalert2": "^11.26.17"
   },

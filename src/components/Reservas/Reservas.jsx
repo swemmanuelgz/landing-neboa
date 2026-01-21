@@ -301,7 +301,10 @@ const Reservas = () => {
       // Usar fetchWithTimeout para timeout de 10 segundos
       const response = await fetchWithTimeout(import.meta.env.VITE_WEBHOOK_RESERVAS, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_JWT_SECRET}`
+        },
         body: JSON.stringify(requestBody)
       })
       
@@ -422,7 +425,10 @@ const Reservas = () => {
       // Usar fetchWithTimeout para timeout de 10 segundos
       const response = await fetchWithTimeout(import.meta.env.VITE_WEBHOOK_RESERVAS, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${import.meta.env.VITE_JWT_SECRET}`
+        },
         body: JSON.stringify({
           reserva_fecha: pendingReserva.fechaFormateada,
           reserva_hora: pendingReserva.hora,
