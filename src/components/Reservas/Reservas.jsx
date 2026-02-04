@@ -447,6 +447,7 @@ const Reservas = () => {
       // Primera petición: Consultar disponibilidad
       // Si ya existe un ID cacheado, lo enviamos para actualizar la reserva temporal existente
       const requestBody = {
+        tool: 'checkAvailability',
         reserva_fecha: fechaFormateada,
         reserva_hora: reserva.hora,
         reserva_invitados: parseInt(reserva.personas),
