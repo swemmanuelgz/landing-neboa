@@ -9,15 +9,168 @@ import './Reservas.css'
 const REQUEST_TIMEOUT = 10000
 const CACHE_KEY = 'neboa_reserva_temporal_id'
 
-// Constantes de horarios
+// ============================================================================
+// 📅 CONFIGURACIÓN DE HORARIOS Y FECHAS ESPECIALES
+// ============================================================================
+// ¡EDITA AQUÍ! Esta sección es fácil de modificar para cambiar horarios,
+// días cerrados y fechas especiales (carnavales, festivos, etc.)
+// ============================================================================
+
 const HORARIOS = {
-  0: ['12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00'], // Domingo
-  1: ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00'], // Lunes
-  2: ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00'], // Martes
-  3: [], // Miércoles cerrado
-  4: ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '20:00', '20:30', '21:00', '21:30', '22:00', '22:30', '23:00'], // Jueves
-  5: ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '20:00', '20:30', '21:00', '21:30', '22:00', '22:30', '23:00'], // Viernes
-  6: ['12:00', '12:30', '13:00', '13:30', '14:00', '14:30', '15:00', '20:00', '20:30', '21:00', '21:30', '22:00', '22:30', '23:00'] // Sábado
+  // -------------------------------------------------------------------------
+  // DÍAS DE LA SEMANA CERRADOS (0=Domingo, 1=Lunes, ... 6=Sábado)
+  // -------------------------------------------------------------------------
+  DIAS_CERRADOS: [3], // Miércoles cerrado TODO el día
+  
+  // -------------------------------------------------------------------------
+  // DÍAS QUE SOLO ABREN MEDIODÍA (sin cenas)
+  // -------------------------------------------------------------------------
+  DIAS_SOLO_MEDIODIA: [0, 1, 2], // Domingo, Lunes, Martes
+  
+  // -------------------------------------------------------------------------
+  // TURNOS DE COMIDA Y CENA (horas de inicio y fin)
+  // -------------------------------------------------------------------------
+  TURNO_DESAYUNO: { inicio: '09:00', fin: '11:30' },
+  TURNO_MEDIODIA: { inicio: '12:00', fin: '15:30' },
+  TURNO_NOCHE: { inicio: '20:00', fin: '23:00' },
+  
+  // -------------------------------------------------------------------------
+  // 🎭 FECHAS EXCEPCIÓN ABIERTAS (días normalmente cerrados que ABRIMOS)
+  // -------------------------------------------------------------------------
+  // Formato: 'YYYY-MM-DD'
+  // Ejemplo: Carnavales 2026 - Abrimos domingo y lunes de carnaval
+  FECHAS_EXCEPCION_ABIERTAS: [
+    '2026-02-16', // Domingo de Carnaval - ABRIMOS con cenas
+    '2026-02-17', // Lunes de Carnaval - ABRIMOS con cenas
+  ],
+  
+  // -------------------------------------------------------------------------
+  // 🚫 FECHAS EXCEPCIÓN CERRADAS (días normalmente abiertos que CERRAMOS)
+  // -------------------------------------------------------------------------
+  // Formato: 'YYYY-MM-DD'
+  // Ejemplo: Descanso post-carnaval
+  FECHAS_EXCEPCION_CERRADAS: [
+    '2026-02-18', // Miércoles post-carnaval - CERRADO (pero es miércoles, ya cerrado)
+    '2026-02-19', // Jueves post-carnaval - CERRAMOS para descanso
+  ],
+  
+  // -------------------------------------------------------------------------
+  // 🌙 FECHAS CON CENA ESPECIAL (días solo mediodía que TAMBIÉN abren cena)
+  // -------------------------------------------------------------------------
+  // Formato: 'YYYY-MM-DD'
+  // Ejemplo: Si un domingo especial queremos abrir cenas
+  FECHAS_CON_CENA_ESPECIAL: [
+    '2026-02-16', // Domingo de Carnaval - cenas especiales
+    '2026-02-17', // Lunes de Carnaval - cenas especiales
+  ],
+  
+  // -------------------------------------------------------------------------
+  // 💬 MENSAJES PARA EL USUARIO
+  // -------------------------------------------------------------------------
+  MENSAJES: {
+    DIA_CERRADO: '❌ Este día estamos cerrados. Por favor, selecciona otro día.',
+    SOLO_MEDIODIA: 'ℹ️ Este día solo abrimos a mediodía (12:00-15:30).',
+    FECHA_CERRADA: '❌ Este día cerramos por descanso. Por favor, selecciona otro día.',
+    CENA_ESPECIAL: '🎉 ¡Día especial! También abrimos para cenas.',
+    CARNAVAL: '🎭 ¡Carnavales! Horario especial disponible.',
+  }
+}
+
+// ============================================================================
+// 🔧 FUNCIONES HELPER PARA HORARIOS
+// ============================================================================
+// Estas funciones usan la configuración de arriba. NO necesitas editarlas.
+// ============================================================================
+
+// Genera array de horas entre inicio y fin (cada 30 min)
+const generarHoras = (inicio, fin) => {
+  const horas = []
+  let [h, m] = inicio.split(':').map(Number)
+  const [finH, finM] = fin.split(':').map(Number)
+  
+  while (h < finH || (h === finH && m <= finM)) {
+    horas.push(`${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`)
+    m += 30
+    if (m >= 60) { m = 0; h++ }
+  }
+  return horas
+}
+
+// Verifica si una fecha es excepción abierta (carnavales, etc.)
+const esFechaExcepcionAbierta = (fecha) => {
+  return HORARIOS.FECHAS_EXCEPCION_ABIERTAS.includes(fecha)
+}
+
+// Verifica si una fecha es excepción cerrada (descanso, etc.)
+const esFechaExcepcionCerrada = (fecha) => {
+  return HORARIOS.FECHAS_EXCEPCION_CERRADAS.includes(fecha)
+}
+
+// Verifica si una fecha tiene cena especial
+const tieneCenaEspecial = (fecha) => {
+  return HORARIOS.FECHAS_CON_CENA_ESPECIAL.includes(fecha)
+}
+
+// Verifica si el día está cerrado (considerando excepciones)
+const estaDiaCerrado = (diaSemana, fecha) => {
+  // Si es excepción abierta, NO está cerrado
+  if (esFechaExcepcionAbierta(fecha)) return false
+  // Si es excepción cerrada, SÍ está cerrado
+  if (esFechaExcepcionCerrada(fecha)) return true
+  // Si no, verificar si el día de la semana está en DIAS_CERRADOS
+  return HORARIOS.DIAS_CERRADOS.includes(diaSemana)
+}
+
+// Verifica si el día es solo mediodía (considerando excepciones)
+const esSoloMediodia = (diaSemana, fecha) => {
+  // Si tiene cena especial, NO es solo mediodía
+  if (tieneCenaEspecial(fecha)) return false
+  // Si no, verificar si el día de la semana está en DIAS_SOLO_MEDIODIA
+  return HORARIOS.DIAS_SOLO_MEDIODIA.includes(diaSemana)
+}
+
+// Obtiene las horas disponibles para una fecha específica
+const obtenerHorariosValidos = (diaSemana, fecha) => {
+  // Si está cerrado, no hay horas
+  if (estaDiaCerrado(diaSemana, fecha)) return []
+  
+  let horas = []
+  
+  // Determinar si incluir desayuno (L-V normales, no fines de semana)
+  const tieneDesayuno = [1, 2, 4, 5].includes(diaSemana) && !esFechaExcepcionAbierta(fecha)
+  
+  // Siempre incluir mediodía (si no está cerrado)
+  if (tieneDesayuno) {
+    horas = [...generarHoras(HORARIOS.TURNO_DESAYUNO.inicio, HORARIOS.TURNO_DESAYUNO.fin)]
+  }
+  horas = [...horas, ...generarHoras(HORARIOS.TURNO_MEDIODIA.inicio, HORARIOS.TURNO_MEDIODIA.fin)]
+  
+  // Incluir cenas si NO es solo mediodía
+  if (!esSoloMediodia(diaSemana, fecha)) {
+    horas = [...horas, ...generarHoras(HORARIOS.TURNO_NOCHE.inicio, HORARIOS.TURNO_NOCHE.fin)]
+  }
+  
+  return horas
+}
+
+// Obtiene el mensaje apropiado para una fecha
+const obtenerMensajeFecha = (diaSemana, fecha) => {
+  if (esFechaExcepcionCerrada(fecha)) {
+    return HORARIOS.MENSAJES.FECHA_CERRADA
+  }
+  if (estaDiaCerrado(diaSemana, fecha)) {
+    return HORARIOS.MENSAJES.DIA_CERRADO
+  }
+  if (esFechaExcepcionAbierta(fecha)) {
+    return HORARIOS.MENSAJES.CARNAVAL
+  }
+  if (tieneCenaEspecial(fecha)) {
+    return HORARIOS.MENSAJES.CENA_ESPECIAL
+  }
+  if (esSoloMediodia(diaSemana, fecha)) {
+    return HORARIOS.MENSAJES.SOLO_MEDIODIA
+  }
+  return ''
 }
 
 const Reservas = () => {
@@ -131,10 +284,11 @@ const Reservas = () => {
     return date.getDay()
   }
 
+  // ACTUALIZADO: Usa el nuevo sistema de configuración con excepciones
   const getAvailableHours = (dateString) => {
     if (!dateString) return []
     const day = getDayOfWeek(dateString)
-    return HORARIOS[day] || []
+    return obtenerHorariosValidos(day, dateString)
   }
 
   // Formatear fecha para mostrar
@@ -160,11 +314,20 @@ const Reservas = () => {
         return
       }
       
+      // ACTUALIZADO: Usar el nuevo sistema de excepciones
       const day = getDayOfWeek(value)
-      if (day === 3) {
-        setMensajeReserva('❌ Los miércoles estamos cerrados. Por favor, selecciona otro día.')
-        setTimeout(() => setMensajeReserva(''), 3000)
+      if (estaDiaCerrado(day, value)) {
+        const mensaje = obtenerMensajeFecha(day, value)
+        setMensajeReserva(mensaje)
+        setTimeout(() => setMensajeReserva(''), 4000)
         return
+      }
+      
+      // Mostrar mensaje informativo si aplica (solo mediodía, cena especial, etc.)
+      const mensajeInfo = obtenerMensajeFecha(day, value)
+      if (mensajeInfo) {
+        setMensajeReserva(mensajeInfo)
+        setTimeout(() => setMensajeReserva(''), 4000)
       }
     }
     
@@ -244,9 +407,11 @@ const Reservas = () => {
       return
     }
     
+    // ACTUALIZADO: Usar el nuevo sistema de excepciones
     const day = getDayOfWeek(reserva.fecha)
-    if (day === 3) {
-      setMensajeReserva('❌ Lo sentimos, los miércoles estamos cerrados.')
+    if (estaDiaCerrado(day, reserva.fecha)) {
+      const mensaje = obtenerMensajeFecha(day, reserva.fecha)
+      setMensajeReserva(mensaje)
       return
     }
 
