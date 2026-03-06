@@ -27,3 +27,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+#json
+*.json
+.github/skills/vercel-composition-patterns/SKILL.md
+.gitignore
+.gitignore

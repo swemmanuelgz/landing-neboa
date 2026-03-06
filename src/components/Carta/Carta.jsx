@@ -12,7 +12,7 @@ import fotoCocteles from '../../img/foto_cocteles.png'
 
 // PDFs
 import cartaDesayunos from '../../img/carta_desayunos.pdf'
-import cartaPrincipal from '../../img/carta_principal.pdf'
+import cartaPrincipal from './nueva_carta/nueva_carta.pdf'
 import cartaTapeo from '../../img/carta_tapeo.pdf'
 import cartaVinos from '../../img/carta_vinos.pdf'
 import cartaCocteleria from '../../img/carta_cocteleria.pdf'
@@ -22,7 +22,6 @@ const cartasData = [
   { title: 'NUESTRA CARTA', image: fotoPlatos, pdf: cartaPrincipal, btnText: 'Carta principal' },
   { title: 'NUESTRAS TAPAS', image: pulpo, pdf: cartaTapeo, btnText: 'Carta de tapeo' },
   { title: 'NUESTROS VINOS', image: fotoVinos, pdf: cartaVinos, btnText: 'Carta de vinos' },
-  { title: 'NUESTROS SPRITZS', image: null, pdf: cartaCocteleria, btnText: 'Carta de spritz', className: 'spritz' },
   { title: 'NUESTROS CÓCTELES', image: fotoCocteles, pdf: cartaCocteleria, btnText: 'Carta de coctelería' },
 ]
 

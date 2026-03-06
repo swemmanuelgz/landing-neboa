@@ -32,6 +32,11 @@ const Footer = () => {
       </div>
       <div className="footer-bottom">
         <p>&copy; 2025 Restaurante Néboa - Ourense. Todos los derechos reservados.</p>
+        <p>
+          <a href="https://nexumouai.com/" target="_blank" rel="noopener noreferrer">
+            Desarrollado por NexumOu Ai SL
+          </a>
+        </p>
       </div>
     </footer>
   )
