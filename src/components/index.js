@@ -1,6 +1,7 @@
 // Componentes
 export { default as Navbar } from './Navbar/Navbar';
 export { default as Hero } from './Hero/Hero';
+export { default as AdSenseAutoAds } from './AdSenseAutoAds/AdSenseAutoAds';
 export { default as Bienvenida } from './Bienvenida/Bienvenida';
 export { default as Carta } from './Carta/Carta';
 export { default as PdfModal } from './PdfModal/PdfModal';

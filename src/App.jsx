@@ -1,5 +1,6 @@
 import './styles/variables.css'
 import {
+  AdSenseAutoAds,
   Navbar,
   Hero,
   Bienvenida,
@@ -17,6 +18,7 @@ import {
 function App() {
   return (
     <>
+      <AdSenseAutoAds />
       <Navbar />
       <Hero />
       
