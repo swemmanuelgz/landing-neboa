@@ -13,7 +13,7 @@ const Footer = () => {
         <div className="footer-info">
           <h3>Contacto</h3>
           <p>📍 Calle Valle Inclán, 21 - Ourense</p>
-          <p>📞 <a href="tel:+34630713713">630 713 713</a></p>
+          <p>🤖 Asistente IA de reservas: <a href="tel:+34988664795">988 664 795</a></p>
           <p>📧 <a href="mailto:restauranteneboaourense@gmail.com">restauranteneboaourense@gmail.com</a></p>
         </div>
         <div className="footer-social">

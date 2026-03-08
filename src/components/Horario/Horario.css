@@ -49,6 +49,18 @@
   background-color: var(--color-dark);
 }
 
+.horario-nota,
+.horario-cocina {
+  color: rgba(255, 255, 255, 0.9);
+  margin-top: 16px;
+  font-size: 1rem;
+}
+
+.horario-cocina {
+  color: var(--color-beige-light);
+  margin-top: 8px;
+}
+
 .horario-telefono {
   margin-top: 30px;
   font-size: 1.3rem;
