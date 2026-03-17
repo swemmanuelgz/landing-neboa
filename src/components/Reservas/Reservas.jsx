@@ -40,8 +40,8 @@ const HORARIOS = {
   // Formato: 'YYYY-MM-DD'
   // Ejemplo: Carnavales 2026 - Abrimos domingo y lunes de carnaval
   FECHAS_EXCEPCION_ABIERTAS: [
-    '2026-02-16', // Domingo de Carnaval - ABRIMOS con cenas
-    '2026-02-17', // Lunes de Carnaval - ABRIMOS con cenas
+    '2026-03-18' // Víspero del dia del padre abre de noche
+    
   ],
   
   // -------------------------------------------------------------------------
