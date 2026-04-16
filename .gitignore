@@ -29,6 +29,7 @@ dist-ssr
 *.sw?
 #json
 *.json
+!vercel.json
 .github/skills/vercel-composition-patterns/SKILL.md
 .gitignore
 .gitignore
