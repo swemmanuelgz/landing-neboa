@@ -12,6 +12,7 @@ const Usuarios = lazy(() => import('./pages/dashboard/Usuarios'))
 const Llamadas = lazy(() => import('./pages/dashboard/Llamadas'))
 const Perfil = lazy(() => import('./pages/dashboard/Perfil'))
 const Horarios = lazy(() => import('./pages/dashboard/Horarios'))
+const DevSettings = lazy(() => import('./pages/dashboard/DevSettings'))
 
 function App() {
   return (
@@ -28,6 +29,7 @@ function App() {
             <Route path="llamadas" element={<Llamadas />} />
             <Route path="perfil" element={<Perfil />} />
             <Route path="horarios" element={<Horarios />} />
+            <Route path="dev" element={<DevSettings />} />
           </Route>
         </Route>
       </Routes>

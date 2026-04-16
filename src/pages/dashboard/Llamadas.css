@@ -239,3 +239,23 @@
   color: rgba(255, 255, 255, 0.7);
   font-size: 0.855rem;
 }
+
+/* Make the entire date input clickable, not just the calendar icon */
+.llamadas-filters .dash-input[type="date"] {
+  cursor: pointer;
+}
+
+.llamadas-table th.sortable {
+  cursor: pointer;
+  user-select: none;
+}
+
+.llamadas-table th.sortable:hover {
+  color: #c4b5a4;
+}
+
+.sort-indicator {
+  font-size: 0.7rem;
+  margin-left: 4px;
+  opacity: 0.8;
+}

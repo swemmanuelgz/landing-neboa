@@ -111,27 +111,39 @@ function LlamadaModal({ llamada, onClose }) {
   )
 }
 
+const defaultDesde = (() => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`
+})()
+
 const Llamadas = () => {
   const [llamadas, setLlamadas] = useState([])
   const [page, setPage] = useState(0)
   const [hasMore, setHasMore] = useState(true)
   const [initialLoading, setInitialLoading] = useState(true)
   const [loadingMore, setLoadingMore] = useState(false)
-  const [filterDesde, setFilterDesde] = useState('')
+  const [filterDesde, setFilterDesde] = useState(() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`
+  })
   const [filterHasta, setFilterHasta] = useState('')
   const [selectedLlamada, setSelectedLlamada] = useState(null)
+  const [sortField, setSortField] = useState('fecha')
+  const [sortAsc, setSortAsc] = useState(false)
   const sentinelRef = useRef(null)
 
-  const loadPage = useCallback(async (pageNum, desde, hasta) => {
+  const loadPage = useCallback(async (pageNum, desde, hasta, field, asc) => {
     const from = pageNum * PAGE_SIZE
     const to = from + PAGE_SIZE - 1
 
     let query = supabase
       .from('llamadas')
       .select('*')
-      .order('fecha', { ascending: false })
-      .order('hora', { ascending: false })
-      .range(from, to)
+      .order(field, { ascending: asc })
+    if (field === 'fecha') {
+      query = query.order('hora', { ascending: asc })
+    }
+    query = query.range(from, to)
     if (desde) query = query.gte('fecha', desde)
     if (hasta) query = query.lte('fecha', hasta)
 
@@ -150,13 +162,30 @@ const Llamadas = () => {
     setPage(pageNum)
   }, [])
 
+  const handleSort = useCallback((field) => {
+    setSortField(prevField => {
+      const newField = field
+      setSortAsc(prevAsc => {
+        const newAsc = prevField === field ? !prevAsc : false
+        setLlamadas([])
+        setPage(0)
+        setHasMore(true)
+        setInitialLoading(true)
+        loadPage(0, filterDesde, filterHasta, newField, newAsc)
+        return newAsc
+      })
+      return newField
+    })
+  }, [filterDesde, filterHasta, loadPage])
+
   // Reset and reload when filters change
   useEffect(() => {
     setLlamadas([])
     setPage(0)
     setHasMore(true)
     setInitialLoading(true)
-    loadPage(0, filterDesde, filterHasta)
+    loadPage(0, filterDesde, filterHasta, sortField, sortAsc)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filterDesde, filterHasta, loadPage])
 
   // IntersectionObserver for infinite scroll
@@ -168,7 +197,7 @@ const Llamadas = () => {
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loadingMore && !initialLoading) {
           setLoadingMore(true)
-          loadPage(page + 1, filterDesde, filterHasta)
+          loadPage(page + 1, filterDesde, filterHasta, sortField, sortAsc)
         }
       },
       { rootMargin: '200px' }
@@ -176,11 +205,11 @@ const Llamadas = () => {
 
     observer.observe(sentinel)
     return () => observer.disconnect()
-  }, [hasMore, loadingMore, initialLoading, page, filterDesde, filterHasta, loadPage])
+  }, [hasMore, loadingMore, initialLoading, page, filterDesde, filterHasta, sortField, sortAsc, loadPage])
 
-  const hasFilters = filterDesde !== '' || filterHasta !== ''
+  const hasFilters = filterDesde !== defaultDesde || filterHasta !== ''
   const clearFilters = () => {
-    setFilterDesde('')
+    setFilterDesde(defaultDesde)
     setFilterHasta('')
   }
 
@@ -226,12 +255,22 @@ const Llamadas = () => {
           <table className="llamadas-table">
             <thead>
               <tr>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Teléfono</th>
-                <th>Duración</th>
+                <th className="sortable" onClick={() => handleSort('fecha')}>
+                  Fecha{sortField === 'fecha' ? <span className="sort-indicator">{sortAsc ? '▲' : '▼'}</span> : ''}
+                </th>
+                <th className="sortable" onClick={() => handleSort('hora')}>
+                  Hora{sortField === 'hora' ? <span className="sort-indicator">{sortAsc ? '▲' : '▼'}</span> : ''}
+                </th>
+                <th className="sortable" onClick={() => handleSort('telefono')}>
+                  Teléfono{sortField === 'telefono' ? <span className="sort-indicator">{sortAsc ? '▲' : '▼'}</span> : ''}
+                </th>
+                <th className="sortable" onClick={() => handleSort('duracion')}>
+                  Duración{sortField === 'duracion' ? <span className="sort-indicator">{sortAsc ? '▲' : '▼'}</span> : ''}
+                </th>
                 <th>Motivo</th>
-                <th>Coste</th>
+                <th className="sortable" onClick={() => handleSort('coste')}>
+                  Coste{sortField === 'coste' ? <span className="sort-indicator">{sortAsc ? '▲' : '▼'}</span> : ''}
+                </th>
                 <th>Resumen</th>
                 <th>Reserva</th>
               </tr>

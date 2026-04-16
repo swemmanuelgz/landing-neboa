@@ -8,7 +8,6 @@ import './Estadisticas.css'
 
 const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic']
 const DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
-const TEST_PHONES = new Set(['+34632079379'])
 
 const PIE_COLORS = {
   confirmada: '#4caf50',
@@ -45,6 +44,7 @@ const tooltipStyle = {
 const Estadisticas = () => {
   const [period, setPeriod] = useState('mes')
   const [loading, setLoading] = useState(true)
+  const [testPhones, setTestPhones] = useState(new Set())
 
   // Raw data
   const [allReservas, setAllReservas] = useState([])
@@ -82,6 +82,9 @@ const Estadisticas = () => {
         ])
         setAllReservas(reservas ?? [])
         setAllLlamadas(llamadas ?? [])
+        supabase.from('test_phones').select('phone').then(({ data }) => {
+          if (data) setTestPhones(new Set(data.map(r => r.phone)))
+        })
       } finally {
         setLoading(false)
       }
@@ -247,7 +250,7 @@ const Estadisticas = () => {
     const telefonoMap = {}
     filtered.forEach(l => {
       if (!l.telefono) return
-      if (TEST_PHONES.has(l.telefono)) return  // skip test numbers
+      if (testPhones.has(l.telefono)) return
       telefonoMap[l.telefono] = (telefonoMap[l.telefono] ?? 0) + (l.coste ?? 0)
     })
     const telefonoArr = Object.entries(telefonoMap)
@@ -271,7 +274,7 @@ const Estadisticas = () => {
       .sort((a, b) => b.coste - a.coste)
       .slice(0, 6)
     setCosteByMotivo(costeMotivoArr)
-  }, [allLlamadas, llamadasDesde, llamadasHasta])
+  }, [allLlamadas, llamadasDesde, llamadasHasta, testPhones])
 
   const formatDuracion = (segundos) => {
     const m = Math.floor(segundos / 60)

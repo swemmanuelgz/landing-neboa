@@ -138,3 +138,131 @@
   margin: 0;
 }
 
+.reservas-table th.sortable-th {
+  cursor: pointer;
+  user-select: none;
+}
+
+.reservas-table th.sortable-th:hover {
+  color: #c4b5a4;
+}
+
+/* ---- Top3 card clickable ---- */
+.top3-card--clickable {
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s;
+}
+
+.top3-card--clickable:hover {
+  border-color: rgba(196, 181, 164, 0.4);
+  background: #424242;
+}
+
+/* ---- Cliente modal ---- */
+.cliente-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  z-index: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.cliente-modal {
+  background: #2a2a2a;
+  border: 1px solid rgba(196, 181, 164, 0.2);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 680px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.cliente-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-bottom: 1px solid rgba(196, 181, 164, 0.12);
+  flex-shrink: 0;
+}
+
+.cliente-modal-phone {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 2px;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+}
+
+.cliente-modal-name {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0 0 4px;
+}
+
+.cliente-modal-stats {
+  font-size: 0.78rem;
+  color: #c4b5a4;
+  margin: 0;
+}
+
+.cliente-modal-close {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  flex-shrink: 0;
+  transition: color 0.15s;
+}
+
+.cliente-modal-close:hover {
+  color: #fff;
+}
+
+.cliente-modal-body {
+  overflow-y: auto;
+  flex: 1;
+}
+
+.cliente-modal-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.cliente-modal-table th {
+  background: #333;
+  color: #c4b5a4;
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  position: sticky;
+  top: 0;
+}
+
+.cliente-modal-table td {
+  padding: 10px 16px;
+  color: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.cliente-modal-table tr:last-child td {
+  border-bottom: none;
+}
+
+.cliente-modal-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+

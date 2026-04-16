@@ -5,7 +5,6 @@ import './ReservasDash.css'
 
 const ESTADOS = ['todas', 'confirmada', 'temporal', 'cancelada', 'no_show']
 const INITIAL_VISIBLE = 25
-const TEST_PHONES = new Set(['+34632079379'])
 
 const estadoBadge = (estado) => {
   const map = {
@@ -21,11 +20,17 @@ const ReservasDash = () => {
   const { role } = useAuth()
   const [reservas, setReservas] = useState([])
   const [loading, setLoading] = useState(true)
-  const [filterDesde, setFilterDesde] = useState('')
+  const [filterDesde, setFilterDesde] = useState(() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`
+  })
   const [filterHasta, setFilterHasta] = useState('')
   const [filterEstado, setFilterEstado] = useState('todas')
   const [searchQuery, setSearchQuery] = useState('')
   const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE)
+  const [sortField, setSortField] = useState('fecha')
+  const [sortAsc, setSortAsc] = useState(true)
+  const [testPhones, setTestPhones] = useState(new Set())
   const sentinelRef = useRef(null)
 
   const fetchReservas = async () => {
@@ -42,6 +47,10 @@ const ReservasDash = () => {
   useEffect(() => {
     fetchReservas()
 
+    supabase.from('test_phones').select('phone').then(({ data }) => {
+      if (data) setTestPhones(new Set(data.map(r => r.phone)))
+    })
+
     const channel = supabase
       .channel('reservas-changes')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'reservas' }, fetchReservas)
@@ -52,7 +61,16 @@ const ReservasDash = () => {
 
   useEffect(() => {
     setVisibleCount(INITIAL_VISIBLE)
-  }, [filterDesde, filterHasta, filterEstado, searchQuery])
+  }, [filterDesde, filterHasta, filterEstado, searchQuery, sortField, sortAsc])
+
+  const handleSort = (field) => {
+    if (sortField === field) {
+      setSortAsc(prev => !prev)
+    } else {
+      setSortField(field)
+      setSortAsc(true)
+    }
+  }
 
   useEffect(() => {
     const sentinel = sentinelRef.current
@@ -85,18 +103,35 @@ const ReservasDash = () => {
     return true
   })
 
-  const visibleItems = filtered.slice(0, visibleCount)
+  const sorted = [...filtered].sort((a, b) => {
+    const av = a[sortField] ?? ''
+    const bv = b[sortField] ?? ''
+    if (av < bv) return sortAsc ? -1 : 1
+    if (av > bv) return sortAsc ? 1 : -1
+    return 0
+  })
+  const visibleItems = sorted.slice(0, visibleCount)
 
   const top3 = Object.values(
-    filtered.reduce((acc, r) => {
-      const key = r.telefono || 'Sin teléfono'
-      if (TEST_PHONES.has(r.telefono)) return acc
+    reservas.reduce((acc, r) => {
+      if (!r.telefono) return acc
+      if (testPhones.has(r.telefono)) return acc
+      const notas = (r.notas ?? '').toLowerCase()
+      if (notas.includes('test') || notas.includes('prueba')) return acc
+      const key = r.telefono
       if (!acc[key]) acc[key] = { telefono: key, nombre: r.nombre || '', count: 0, invitados: 0 }
       acc[key].count += 1
       acc[key].invitados += r.invitados ?? 0
       return acc
     }, {})
   ).sort((a, b) => b.count - a.count).slice(0, 3)
+
+  const defaultDesde = (() => {
+    const d = new Date()
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`
+  })()
+
+  const [clienteModal, setClienteModal] = useState(null)
 
   const CROWNS = ['🥇', '🥈', '🥉']
 
@@ -144,10 +179,10 @@ const ReservasDash = () => {
             <option key={e} value={e}>{e.charAt(0).toUpperCase() + e.slice(1)}</option>
           ))}
         </select>
-        {(filterDesde || filterHasta || filterEstado !== 'todas' || searchQuery) ? (
+        {(filterDesde !== defaultDesde || filterHasta || filterEstado !== 'todas' || searchQuery) ? (
           <button
             className="dash-btn-outline"
-            onClick={() => { setFilterDesde(''); setFilterHasta(''); setFilterEstado('todas'); setSearchQuery('') }}
+            onClick={() => { setFilterDesde(defaultDesde); setFilterHasta(''); setFilterEstado('todas'); setSearchQuery('') }}
           >
             Limpiar filtros
           </button>
@@ -159,7 +194,11 @@ const ReservasDash = () => {
           <h3>Top clientes</h3>
           <div className="top3-cards">
             {top3.map((client, i) => (
-              <div key={client.telefono} className="top3-card">
+              <div
+                key={client.telefono}
+                className="top3-card top3-card--clickable"
+                onClick={() => setClienteModal(client)}
+              >
                 <p className="top3-phone">{CROWNS[i]} {client.telefono}</p>
                 {client.nombre ? <p className="top3-name">{client.nombre}</p> : null}
                 <p className="top3-stats">{client.count} reservas · {client.invitados} personas</p>
@@ -178,12 +217,12 @@ const ReservasDash = () => {
           <table className="reservas-table">
             <thead>
               <tr>
-                <th>Fecha</th>
-                <th>Hora</th>
-                <th>Nombre</th>
-                <th>Teléfono</th>
-                <th>Personas</th>
-                <th>Estado</th>
+                <th className="sortable-th" onClick={() => handleSort('fecha')}>Fecha{sortField === 'fecha' ? (sortAsc ? ' ▲' : ' ▼') : ''}</th>
+                <th className="sortable-th" onClick={() => handleSort('hora')}>Hora{sortField === 'hora' ? (sortAsc ? ' ▲' : ' ▼') : ''}</th>
+                <th className="sortable-th" onClick={() => handleSort('nombre')}>Nombre{sortField === 'nombre' ? (sortAsc ? ' ▲' : ' ▼') : ''}</th>
+                <th className="sortable-th" onClick={() => handleSort('telefono')}>Teléfono{sortField === 'telefono' ? (sortAsc ? ' ▲' : ' ▼') : ''}</th>
+                <th className="sortable-th" onClick={() => handleSort('invitados')}>Personas{sortField === 'invitados' ? (sortAsc ? ' ▲' : ' ▼') : ''}</th>
+                <th className="sortable-th" onClick={() => handleSort('estado')}>Estado{sortField === 'estado' ? (sortAsc ? ' ▲' : ' ▼') : ''}</th>
                 <th>Notas</th>
                 {role !== 'worker' ? <th>Acciones</th> : null}
               </tr>
@@ -236,6 +275,63 @@ const ReservasDash = () => {
           )}
         </div>
       )}
+      {clienteModal && (() => {
+        const clienteReservas = reservas
+          .filter(r => r.telefono === clienteModal.telefono)
+          .sort((a, b) => (a.fecha > b.fecha ? -1 : a.fecha < b.fecha ? 1 : 0))
+        return (
+          <div className="cliente-modal-overlay" onClick={() => setClienteModal(null)}>
+            <div className="cliente-modal" onClick={e => e.stopPropagation()}>
+              <div className="cliente-modal-header">
+                <div>
+                  <p className="cliente-modal-phone">{clienteModal.telefono}</p>
+                  {clienteModal.nombre && <p className="cliente-modal-name">{clienteModal.nombre}</p>}
+                  <p className="cliente-modal-stats">{clienteModal.count} reservas · {clienteModal.invitados} personas totales</p>
+                </div>
+                <button className="cliente-modal-close" onClick={() => setClienteModal(null)}>×</button>
+              </div>
+              <div className="cliente-modal-body">
+                <table className="cliente-modal-table">
+                  <thead>
+                    <tr>
+                      <th>Fecha</th>
+                      <th>Hora</th>
+                      <th>Personas</th>
+                      <th>Estado</th>
+                      <th>Notas</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {clienteReservas.map(r => {
+                      const badge = estadoBadge(r.estado)
+                      return (
+                        <tr key={r.id}>
+                          <td>{r.fecha}</td>
+                          <td>{r.hora?.slice(0, 5)}</td>
+                          <td style={{ textAlign: 'center' }}>{r.invitados}</td>
+                          <td>
+                            <span
+                              className="estado-badge"
+                              style={{
+                                background: badge.color + '22',
+                                color: badge.color,
+                                border: `1px solid ${badge.color}44`,
+                              }}
+                            >
+                              {badge.label}
+                            </span>
+                          </td>
+                          <td className="notas-cell">{r.notas || '—'}</td>
+                        </tr>
+                      )
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }

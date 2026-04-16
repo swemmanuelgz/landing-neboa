@@ -1,0 +1,84 @@
+.dev-settings-dash {
+  max-width: 640px;
+}
+
+.dev-settings-section {
+  background: #3a3a3a;
+  border: 1px solid rgba(196, 181, 164, 0.12);
+  border-radius: 10px;
+  padding: 24px;
+  margin-bottom: 24px;
+}
+
+.dev-settings-section-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.2rem;
+  font-weight: 400;
+  font-style: italic;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+}
+
+.dev-settings-desc {
+  font-size: 0.82rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 20px 0;
+  line-height: 1.5;
+}
+
+.dev-settings-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.dev-settings-label-input {
+  flex: 1;
+  min-width: 140px;
+}
+
+.dev-phones-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.dev-phone-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(196, 181, 164, 0.1);
+  border-radius: 6px;
+}
+
+.dev-phone-number {
+  font-size: 0.88rem;
+  color: #ffffff;
+  font-family: monospace;
+  letter-spacing: 0.5px;
+}
+
+.dev-phone-label {
+  font-size: 0.78rem;
+  color: rgba(196, 181, 164, 0.7);
+  flex: 1;
+}
+
+.dev-phone-edit {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.dev-phone-delete {
+  flex-shrink: 0;
+}
+
+.dev-phone-edit-row {
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  background: #2a2a2a;
+}
