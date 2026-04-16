@@ -10,9 +10,11 @@ import {
   obtenerHorariosValidos,
   formatTime,
 } from '../../hooks/useHorario'
+import { supabase } from '../../lib/supabase'
 import './Reservas.css'
 
 const REQUEST_TIMEOUT = 10000
+const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reservas-proxy`
 const CACHE_KEY = 'neboa_reserva_temporal_id'
 
 const MENSAJES = {
@@ -47,7 +49,6 @@ const Reservas = () => {
     // Recuperar del localStorage al inicializar
     const saved = localStorage.getItem(CACHE_KEY)
     if (saved) {
-      console.log('📦 ID temporal recuperado de localStorage:', saved)
       return saved
     }
     return null
@@ -57,10 +58,8 @@ const Reservas = () => {
   useEffect(() => {
     if (cachedReservaId) {
       localStorage.setItem(CACHE_KEY, cachedReservaId)
-      console.log('💾 ID temporal guardado en localStorage:', cachedReservaId)
     } else {
       localStorage.removeItem(CACHE_KEY)
-      console.log('🗑️ ID temporal eliminado de localStorage')
     }
   }, [cachedReservaId])
 
@@ -282,9 +281,6 @@ const Reservas = () => {
 
     // Si ya existe una reserva temporal en cache, mostrar modal directamente
     if (cachedReservaId) {
-      console.log('✅ Ya existe reserva temporal con ID:', cachedReservaId)
-      console.log('⏩ Mostrando modal sin crear nueva reserva')
-      
       setReservaStatus('pending_confirm')
       setPendingReserva({
         nombre: reserva.nombre,
@@ -322,37 +318,26 @@ const Reservas = () => {
       // Si hay un ID cacheado, lo enviamos para reutilizar la reserva temporal
       if (cachedReservaId) {
         requestBody.reserva_id = cachedReservaId
-        console.log('📌 Reutilizando ID temporal de localStorage:', cachedReservaId)
       }
       
-      // Usar fetchWithTimeout para timeout de 10 segundos
-      const response = await fetchWithTimeout(import.meta.env.VITE_WEBHOOK_RESERVAS, {
+      // Llamar a la Edge Function (proxy seguro — no expone secrets)
+      const response = await fetchWithTimeout(EDGE_FUNCTION_URL, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_JWT_SECRET}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(requestBody)
       })
-      
+
       // Verificar que hay respuesta
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}`)
       }
 
       const data = await response.json()
-      console.log('=== RESPUESTA CONSULTA DISPONIBILIDAD (reserva_boolean: false) ===')
-      console.log('Data completa:', JSON.stringify(data, null, 2))
-      
+
       const result = data.results?.[0] || data
       const resultText = result.result || result.message || ''
       const disponibilidad = result.disponibilidad || result.status || ''
       const reservaIdRecibido = result.reserva_id || result.id || null
-      
-      console.log('Result:', result)
-      console.log('ResultText:', resultText)
-      console.log('Disponibilidad:', disponibilidad)
-      console.log('ID temporal recibido:', reservaIdRecibido)
 
       // IMPORTANTE: Esta es SOLO consulta de disponibilidad, NO confirmación
       // n8n debe devolver el ID de la reserva temporal
@@ -375,12 +360,8 @@ const Reservas = () => {
         // Guardar en cache para futuras consultas
         if (!cachedReservaId && newReservaId) {
           setCachedReservaId(newReservaId)
-          console.log('💾 ID temporal guardado en cache:', newReservaId)
         }
-        
-        console.log('✅ DISPONIBILIDAD CONFIRMADA - ID temporal:', tempReservaId)
-        console.log('📋 Mostrando modal para que usuario confirme...')
-        
+
         // Guardar datos pendientes para la confirmación
         setPendingReserva({
           reserva_id: tempReservaId,
@@ -396,8 +377,6 @@ const Reservas = () => {
         setReservaStatus('pending_confirm')
         setMensajeReserva('')
         setShowConfirmModal(true)
-        
-        console.log('✅ Modal activado. showConfirmModal = true')
 
       } else if (resultText.includes('pero tenemos huecos') || resultText.includes('alternativas') || disponibilidad === 'Alternativas') {
         const altArray = result.alternativas || []
@@ -440,22 +419,15 @@ const Reservas = () => {
   const confirmarReserva = async () => {
     if (!pendingReserva) return
     
-    console.log('=== CONFIRMANDO RESERVA (reserva_boolean: true) ===')
-    console.log('Datos a enviar:', pendingReserva)
-    
     setShowConfirmModal(false)
     setReservaStatus('loading')
     setMensajeReserva('⏳ Confirmando tu reserva...')
 
     try {
       // Segunda petición: Confirmar la reserva temporal → estado CONFIRMADO
-      // Usar fetchWithTimeout para timeout de 10 segundos
-      const response = await fetchWithTimeout(import.meta.env.VITE_WEBHOOK_RESERVAS, {
+      const response = await fetchWithTimeout(EDGE_FUNCTION_URL, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_JWT_SECRET}`
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           reserva_fecha: pendingReserva.fechaFormateada,
           reserva_hora: pendingReserva.hora,
@@ -476,8 +448,6 @@ const Reservas = () => {
 
       // Leer respuesta como texto primero
       const responseText = await response.text()
-      console.log('=== RESPUESTA CONFIRMACIÓN (raw) ===')
-      console.log('Response text:', responseText)
       
       if (!responseText || !responseText.trim()) {
         throw new Error('Respuesta vacía del servidor')
@@ -489,7 +459,6 @@ const Reservas = () => {
       
       try {
         data = JSON.parse(responseText)
-        console.log('Data parsed:', data)
         
         // Extraer mensaje del body si es respuesta de Twilio
         if (Array.isArray(data) && data[0]?.body) {
@@ -501,8 +470,7 @@ const Reservas = () => {
         } else if (data.result) {
           confirmMessage = data.result
         }
-      } catch (parseError) {
-        console.log('Respuesta no es JSON, usando como texto')
+      } catch {
         confirmMessage = responseText
       }
 
@@ -510,18 +478,14 @@ const Reservas = () => {
       setReservaId(pendingReserva.reserva_id)
       setReservaStatus('success')
       setMensajeReserva('✅ ¡Reserva confirmada!')
-      
-      console.log('✅ Reserva confirmada definitivamente. ID:', pendingReserva.reserva_id)
-      
+
       // Mostrar modal de éxito con SweetAlert
       Swal.fire({
         icon: 'success',
         title: '🎉 ¡Reserva confirmada!',
-        html: confirmMessage 
-          ? `<div style="text-align: left; white-space: pre-wrap; font-size: 0.95rem;">${confirmMessage}</div>`
-          : `<p>Tu reserva ha sido confirmada correctamente.</p>
-             <p style="margin-top: 10px;"><strong>ID de reserva:</strong> ${pendingReserva.reserva_id}</p>
-             <p style="margin-top: 10px;">Recibirás un WhatsApp de confirmación en breve.</p>`,
+        text: confirmMessage
+          ? confirmMessage
+          : `Tu reserva ha sido confirmada correctamente. ID de reserva: ${pendingReserva.reserva_id}. Recibirás un WhatsApp de confirmación en breve.`,
         confirmButtonText: '¡Genial!',
         confirmButtonColor: '#c4b5a4',
         background: '#2a2a2a',

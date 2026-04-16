@@ -43,7 +43,8 @@ export default function Perfil() {
     setProfileMsg(null)
     const { error } = await supabase
       .from('profiles')
-      .upsert({ id: user.id, email: user.email, full_name: fullName })
+      .update({ full_name: fullName })
+      .eq('id', user.id)
     if (error) {
       setProfileMsg({ type: 'error', text: 'Error al guardar los cambios.' })
     } else {
@@ -60,8 +61,8 @@ export default function Perfil() {
       setPassMsg({ type: 'error', text: 'Las contraseñas nuevas no coinciden.' })
       return
     }
-    if (newPassword.length < 6) {
-      setPassMsg({ type: 'error', text: 'La nueva contraseña debe tener al menos 6 caracteres.' })
+    if (newPassword.length < 8) {
+      setPassMsg({ type: 'error', text: 'La nueva contraseña debe tener al menos 8 caracteres.' })
       return
     }
 

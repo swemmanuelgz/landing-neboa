@@ -10,9 +10,10 @@ const MESES = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'O
 const DIAS = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 
 const PIE_COLORS = {
-  confirmada: '#4caf50',
+  confirmada: '#66bb6a',
   temporal: '#ff9800',
-  cancelada: '#f44336',
+  cancelada: '#ef5350',
+  pasado: '#2e7d32',
   no_show: 'rgba(255,255,255,0.3)',
 }
 
@@ -101,13 +102,20 @@ const Estadisticas = () => {
       return true
     })
 
-    // Monthly data (last 12 months)
+    // Monthly data — respect date filters or default to last 12 months
     const monthMap = {}
     const today = new Date()
-    for (let i = 11; i >= 0; i--) {
-      const d = new Date(today.getFullYear(), today.getMonth() - i, 1)
+    let monthStart, monthEnd
+    if (reservasDesde || reservasHasta) {
+      monthStart = reservasDesde ? new Date(reservasDesde + 'T00:00:00') : new Date(today.getFullYear(), today.getMonth() - 11, 1)
+      monthEnd = reservasHasta ? new Date(reservasHasta + 'T00:00:00') : today
+    } else {
+      monthEnd = today
+      monthStart = new Date(today.getFullYear(), today.getMonth() - 11, 1)
+    }
+    for (let d = new Date(monthStart.getFullYear(), monthStart.getMonth(), 1); d <= monthEnd; d = new Date(d.getFullYear(), d.getMonth() + 1, 1)) {
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      monthMap[key] = { mes: MESES[d.getMonth()], reservas: 0, comensales: 0 }
+      monthMap[key] = { mes: `${MESES[d.getMonth()]} ${d.getFullYear() !== today.getFullYear() ? d.getFullYear() : ''}`.trim(), reservas: 0, comensales: 0 }
     }
     filtered.forEach(r => {
       if (!r.fecha) return
@@ -119,34 +127,42 @@ const Estadisticas = () => {
     })
     setMonthlyData(Object.values(monthMap))
 
-    // Weekly data (last 12 weeks)
+    // Weekly data — respect date filters or default to last 12 weeks
     const weekMap = {}
-    const todayForWeek = new Date()
-    const dayOfWeek = todayForWeek.getDay() || 7
-    const currentMonday = new Date(todayForWeek)
-    currentMonday.setDate(todayForWeek.getDate() - (dayOfWeek - 1))
-    currentMonday.setHours(0, 0, 0, 0)
-    for (let i = 11; i >= 0; i--) {
-      const monday = new Date(currentMonday)
-      monday.setDate(currentMonday.getDate() - i * 7)
-      const year = monday.getFullYear()
+    const getMonday = (d) => {
+      const day = d.getDay() || 7
+      const mon = new Date(d)
+      mon.setDate(d.getDate() - (day - 1))
+      mon.setHours(0, 0, 0, 0)
+      return mon
+    }
+    const getWeekKey = (d) => {
+      const year = d.getFullYear()
       const jan4 = new Date(year, 0, 4)
-      const startOfYear = new Date(jan4)
-      startOfYear.setDate(jan4.getDate() - ((jan4.getDay() || 7) - 1))
-      const weekNum = Math.round((monday - startOfYear) / (7 * 24 * 60 * 60 * 1000)) + 1
-      const key = `${year}-W${String(weekNum).padStart(2, '0')}`
-      const label = `${monday.getDate()} ${MESES[monday.getMonth()]}`
-      weekMap[key] = { label, reservas: 0, comensales: 0, _monday: monday.toISOString().slice(0, 10) }
+      const soy = new Date(jan4)
+      soy.setDate(jan4.getDate() - ((jan4.getDay() || 7) - 1))
+      const weekNum = Math.round((d - soy) / (7 * 24 * 60 * 60 * 1000)) + 1
+      return `${year}-W${String(weekNum).padStart(2, '0')}`
+    }
+    const todayForWeek = new Date()
+    const currentMonday = getMonday(todayForWeek)
+    let weekStart, weekEnd
+    if (reservasDesde || reservasHasta) {
+      weekStart = reservasDesde ? getMonday(new Date(reservasDesde + 'T00:00:00')) : new Date(currentMonday.getTime() - 11 * 7 * 86400000)
+      weekEnd = reservasHasta ? getMonday(new Date(reservasHasta + 'T00:00:00')) : currentMonday
+    } else {
+      weekEnd = currentMonday
+      weekStart = new Date(currentMonday.getTime() - 11 * 7 * 86400000)
+    }
+    for (let mon = new Date(weekStart); mon <= weekEnd; mon.setDate(mon.getDate() + 7)) {
+      const key = getWeekKey(mon)
+      const label = `${mon.getDate()} ${MESES[mon.getMonth()]}`
+      weekMap[key] = { label, reservas: 0, comensales: 0, _monday: mon.toISOString().slice(0, 10) }
     }
     filtered.forEach(r => {
       if (!r.fecha) return
       const d = new Date(r.fecha + 'T00:00:00')
-      const year = d.getFullYear()
-      const jan4 = new Date(year, 0, 4)
-      const startOfYear = new Date(jan4)
-      startOfYear.setDate(jan4.getDate() - ((jan4.getDay() || 7) - 1))
-      const weekNum = Math.round((d - startOfYear) / (7 * 24 * 60 * 60 * 1000)) + 1
-      const key = `${year}-W${String(weekNum).padStart(2, '0')}`
+      const key = getWeekKey(d)
       if (weekMap[key]) {
         weekMap[key].reservas += 1
         weekMap[key].comensales += r.invitados ?? 0
@@ -154,13 +170,19 @@ const Estadisticas = () => {
     })
     setWeeklyData(Object.values(weekMap))
 
-    // Daily data (last 30 days)
+    // Daily data — respect date filters or default to last 30 days
     const dayMapDaily = {}
     const todayForDaily = new Date()
-    for (let i = 29; i >= 0; i--) {
-      const d = new Date(todayForDaily)
-      d.setDate(todayForDaily.getDate() - i)
-      d.setHours(0, 0, 0, 0)
+    todayForDaily.setHours(0, 0, 0, 0)
+    let dailyStart, dailyEnd
+    if (reservasDesde || reservasHasta) {
+      dailyStart = reservasDesde ? new Date(reservasDesde + 'T00:00:00') : new Date(todayForDaily.getTime() - 29 * 86400000)
+      dailyEnd = reservasHasta ? new Date(reservasHasta + 'T00:00:00') : todayForDaily
+    } else {
+      dailyEnd = todayForDaily
+      dailyStart = new Date(todayForDaily.getTime() - 29 * 86400000)
+    }
+    for (let d = new Date(dailyStart); d <= dailyEnd; d.setDate(d.getDate() + 1)) {
       const key = d.toISOString().slice(0, 10)
       const label = `${d.getDate()} ${MESES[d.getMonth()]}`
       dayMapDaily[key] = { label, reservas: 0, comensales: 0 }
@@ -405,25 +427,37 @@ const Estadisticas = () => {
         <div className="stats-card">
           <h2>Estado de reservas</h2>
           {byStatus.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={byStatus}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={50}
-                  outerRadius={80}
-                  paddingAngle={3}
-                  dataKey="value"
-                >
-                  {byStatus.map((entry) => (
-                    <Cell key={entry.name} fill={PIE_COLORS[entry.name] ?? '#c4b5a4'} />
-                  ))}
-                </Pie>
-                <Tooltip contentStyle={tooltipStyle.contentStyle} />
-                <Legend wrapperStyle={{ color: 'rgba(255,255,255,0.7)', fontSize: 11 }} />
-              </PieChart>
-            </ResponsiveContainer>
+            <>
+              <ResponsiveContainer width="100%" height={200}>
+                <PieChart>
+                  <Pie
+                    data={byStatus}
+                    cx="50%"
+                    cy="50%"
+                    innerRadius={50}
+                    outerRadius={80}
+                    paddingAngle={3}
+                    dataKey="value"
+                  >
+                    {byStatus.map((entry) => (
+                      <Cell key={entry.name} fill={PIE_COLORS[entry.name] ?? '#c4b5a4'} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={tooltipStyle.contentStyle} />
+                  <Legend wrapperStyle={{ color: 'rgba(255,255,255,0.7)', fontSize: 11 }} />
+                </PieChart>
+              </ResponsiveContainer>
+              <p className="stats-cancel-ratio">
+                Ratio de cancelación:{' '}
+                <strong>
+                  {(() => {
+                    const total = byStatus.reduce((s, e) => s + e.value, 0)
+                    const canceladas = byStatus.find(e => e.name === 'cancelada')?.value ?? 0
+                    return total > 0 ? ((canceladas / total) * 100).toFixed(1) : '0.0'
+                  })()}%
+                </strong>
+              </p>
+            </>
           ) : (
             <div className="dash-empty" style={{ height: 200, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
               Sin datos

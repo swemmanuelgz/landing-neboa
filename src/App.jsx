@@ -1,7 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { Routes, Route } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
-import ProtectedRoute from './components/ProtectedRoute/ProtectedRoute'
+import ProtectedRoute, { RoleRoute } from './components/ProtectedRoute/ProtectedRoute'
 import './styles/variables.css'
 
 const Login = lazy(() => import('./pages/Login'))
@@ -25,11 +25,13 @@ function App() {
             <Route index element={<ReservasDash />} />
             <Route path="reservas" element={<ReservasDash />} />
             <Route path="estadisticas" element={<Estadisticas />} />
-            <Route path="usuarios" element={<Usuarios />} />
             <Route path="llamadas" element={<Llamadas />} />
             <Route path="perfil" element={<Perfil />} />
-            <Route path="horarios" element={<Horarios />} />
-            <Route path="dev" element={<DevSettings />} />
+            <Route element={<RoleRoute allowed={['admin', 'developer']} />}>
+              <Route path="usuarios" element={<Usuarios />} />
+              <Route path="horarios" element={<Horarios />} />
+              <Route path="dev" element={<DevSettings />} />
+            </Route>
           </Route>
         </Route>
       </Routes>
