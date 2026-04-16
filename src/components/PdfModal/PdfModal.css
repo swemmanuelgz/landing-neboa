@@ -63,13 +63,6 @@
   transform: rotate(90deg);
 }
 
-.pdf-viewer {
-  flex: 1;
-  border: none;
-  border-radius: 0 0 12px 12px;
-  width: 100%;
-}
-
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 768px) {
   .pdf-modal {
@@ -101,17 +94,76 @@
     height: 80vh;
     border-radius: 8px;
   }
-  
+
   .pdf-modal-header {
     padding: 0.8rem;
     border-radius: 8px 8px 0 0;
   }
-  
+
   .pdf-modal-header h3 {
     font-size: 1rem;
   }
-  
-  .pdf-viewer {
-    border-radius: 0 0 8px 8px;
-  }
+
+}
+
+/* ==================== PDF CANVAS VIEWER ==================== */
+.pdf-scroll-container {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  justify-content: center;
+  padding: 16px;
+  background: #f0f0f0;
+  min-height: 300px;
+}
+
+.pdf-loading,
+.pdf-error {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 200px;
+  font-size: 1rem;
+  color: #666;
+  font-style: italic;
+}
+
+.pdf-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 12px 16px;
+  background: #2a2a2a;
+  color: #fff;
+  border-top: 1px solid rgba(196, 181, 164, 0.2);
+  flex-shrink: 0;
+}
+
+.pdf-pagination button {
+  background: #c4b5a4;
+  color: #2a2a2a;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: background 0.2s;
+}
+
+.pdf-pagination button:hover:not(:disabled) {
+  background: #d4c5b4;
+}
+
+.pdf-pagination button:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pdf-pagination span {
+  font-size: 0.85rem;
+  min-width: 60px;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.8);
 }

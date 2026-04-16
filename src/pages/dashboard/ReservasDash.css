@@ -1,0 +1,140 @@
+.reservas-dash {
+  max-width: 1200px;
+}
+
+.reservas-search {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.reservas-search-input {
+  flex: 1;
+  max-width: 400px;
+}
+
+.reservas-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.reservas-table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(196, 181, 164, 0.1);
+}
+
+.reservas-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.reservas-table th {
+  background: #3a3a3a;
+  color: #c4b5a4;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(196, 181, 164, 0.15);
+}
+
+.reservas-table td {
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.reservas-table tr:last-child td {
+  border-bottom: none;
+}
+
+.reservas-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.estado-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.notas-cell {
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dash-btn-outline {
+  background: transparent;
+  border: 1px solid rgba(196, 181, 164, 0.3);
+  color: #c4b5a4;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.dash-btn-outline:hover {
+  border-color: #c4b5a4;
+}
+
+.top3-section {
+  margin-bottom: 24px;
+}
+
+.top3-section h3 {
+  font-size: 0.72rem;
+  letter-spacing: 1px;
+  color: #c4b5a4;
+  margin: 0 0 12px;
+  text-transform: uppercase;
+}
+
+.top3-cards {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.top3-card {
+  background: #3a3a3a;
+  border: 1px solid rgba(196, 181, 164, 0.15);
+  border-radius: 8px;
+  padding: 12px 16px;
+  min-width: 160px;
+  flex: 1;
+}
+
+.top3-phone {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 2px;
+}
+
+.top3-name {
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.5);
+  margin: 0 0 6px;
+}
+
+.top3-stats {
+  font-size: 0.78rem;
+  color: #c4b5a4;
+  margin: 0;
+}
+

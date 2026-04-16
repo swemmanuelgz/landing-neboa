@@ -1,0 +1,121 @@
+.usuarios-dash {
+  max-width: 900px;
+}
+
+.usuarios-table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(196, 181, 164, 0.1);
+  margin-bottom: 40px;
+}
+
+.usuarios-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+}
+
+.usuarios-table th {
+  background: #3a3a3a;
+  color: #c4b5a4;
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  border-bottom: 1px solid rgba(196, 181, 164, 0.15);
+}
+
+.usuarios-table td {
+  padding: 12px 16px;
+  color: rgba(255, 255, 255, 0.85);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.usuarios-table tr:last-child td {
+  border-bottom: none;
+}
+
+.usuarios-table tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.current-user-row td {
+  color: #c4b5a4;
+}
+
+.invite-section {
+  background: #3a3a3a;
+  border-radius: 10px;
+  padding: 28px;
+  border: 1px solid rgba(196, 181, 164, 0.1);
+}
+
+.invite-section h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 400;
+  font-style: italic;
+  color: #ffffff;
+  margin: 0 0 8px 0;
+}
+
+.invite-desc {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.85rem;
+  margin: 0 0 20px 0;
+}
+
+.invite-form {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: flex-end;
+}
+
+.invite-form .dash-input,
+.invite-form .dash-select {
+  flex: 1;
+  min-width: 180px;
+}
+
+.invite-msg {
+  margin-top: 14px;
+  padding: 10px 14px;
+  border-radius: 6px;
+  font-size: 0.88rem;
+}
+
+.invite-msg--success {
+  background: rgba(76, 175, 80, 0.12);
+  color: #66bb6a;
+  border: 1px solid rgba(76, 175, 80, 0.2);
+}
+
+.invite-msg--error {
+  background: rgba(244, 67, 54, 0.12);
+  color: #ef5350;
+  border: 1px solid rgba(244, 67, 54, 0.2);
+}
+
+.user-status-badge {
+  display: inline-block;
+  padding: 3px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.3px;
+}
+
+.user-status-badge--activo {
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.35);
+  color: #81c784;
+}
+
+.user-status-badge--pendiente {
+  background: rgba(255, 152, 0, 0.15);
+  border: 1px solid rgba(255, 152, 0, 0.35);
+  color: #ffb74d;
+}

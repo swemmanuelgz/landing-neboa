@@ -1,0 +1,241 @@
+.llamadas-dash {
+  max-width: 1200px;
+}
+
+.llamadas-filters {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+  align-items: flex-end;
+}
+
+.dash-filter-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: rgba(255, 255, 255, 0.5);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.llamadas-table-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(196, 181, 164, 0.1);
+}
+
+.llamadas-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.85);
+  background: #3a3a3a;
+}
+
+.llamadas-table th {
+  padding: 12px 16px;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(196, 181, 164, 0.7);
+  background: rgba(196, 181, 164, 0.05);
+  border-bottom: 1px solid rgba(196, 181, 164, 0.1);
+  white-space: nowrap;
+}
+
+.llamadas-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.llamadas-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.llamadas-table tbody tr {
+  cursor: pointer;
+}
+
+.llamadas-table tbody tr:hover {
+  background: rgba(196, 181, 164, 0.07);
+}
+
+.resumen-cell {
+  display: block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dash-btn-outline {
+  background: transparent;
+  border: 1px solid rgba(196, 181, 164, 0.3);
+  color: #c4b5a4;
+  padding: 8px 14px;
+  border-radius: 6px;
+  font-size: 0.82rem;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.dash-btn-outline:hover {
+  border-color: #c4b5a4;
+}
+
+/* Motivo badges */
+.motivo-badge {
+  display: inline-block;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-size: 0.72rem;
+  white-space: nowrap;
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+.motivo-badge--cliente {
+  background: rgba(76, 175, 80, 0.15);
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  color: #81c784;
+}
+
+.motivo-badge--redirigida {
+  background: rgba(33, 150, 243, 0.15);
+  border: 1px solid rgba(33, 150, 243, 0.4);
+  color: #64b5f6;
+}
+
+.motivo-badge--asistente {
+  background: rgba(196, 181, 164, 0.12);
+  border: 1px solid rgba(196, 181, 164, 0.3);
+  color: #c4b5a4;
+}
+
+.motivo-badge--silencio {
+  background: rgba(255, 152, 0, 0.15);
+  border: 1px solid rgba(255, 152, 0, 0.4);
+  color: #ffb74d;
+}
+
+.motivo-badge--error {
+  background: rgba(244, 67, 54, 0.12);
+  border: 1px solid rgba(244, 67, 54, 0.3);
+  color: #e57373;
+}
+
+.motivo-badge--otros {
+  background: rgba(196, 181, 164, 0.08);
+  border: 1px solid rgba(196, 181, 164, 0.2);
+  color: rgba(196, 181, 164, 0.6);
+}
+
+/* Modal */
+.llamadas-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  animation: overlay-fade-in 0.18s ease;
+  padding: 16px;
+}
+
+@keyframes overlay-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.llamadas-modal {
+  background: #2a2a2a;
+  border: 1px solid rgba(196, 181, 164, 0.15);
+  border-radius: 12px;
+  width: 100%;
+  max-width: 520px;
+  max-height: 90vh;
+  overflow-y: auto;
+  position: relative;
+  animation: modal-scale-in 0.18s ease;
+}
+
+@keyframes modal-scale-in {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.llamadas-modal-close {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 1.5rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+  transition: color 0.15s;
+}
+
+.llamadas-modal-close:hover {
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.llamadas-modal-header {
+  padding: 24px 24px 16px;
+  border-bottom: 1px solid rgba(196, 181, 164, 0.1);
+}
+
+.llamadas-modal-telefono {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.75rem;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.llamadas-modal-body {
+  padding: 20px 24px 24px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.llamadas-modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.llamadas-modal-field--full {
+  grid-column: 1 / -1;
+}
+
+.llamadas-modal-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(196, 181, 164, 0.6);
+  font-weight: 600;
+}
+
+.llamadas-modal-value {
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.85);
+}
+
+.llamadas-modal-resumen {
+  white-space: pre-wrap;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.855rem;
+}

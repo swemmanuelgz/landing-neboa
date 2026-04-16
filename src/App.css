@@ -137,7 +137,7 @@
 
 /* ==================== HERO SECTION ==================== */
 .hero {
-  height: 100vh;
+  height: 100dvh;
   background: linear-gradient(135deg, var(--color-darker) 0%, var(--color-dark) 100%);
   display: flex;
   align-items: center;

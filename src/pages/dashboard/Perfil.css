@@ -1,0 +1,102 @@
+.perfil-dash {
+  max-width: 640px;
+}
+
+.perfil-card {
+  background: #3a3a3a;
+  border-radius: 10px;
+  padding: 28px;
+  border: 1px solid rgba(196, 181, 164, 0.1);
+  margin-bottom: 24px;
+}
+
+.perfil-card h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.1rem;
+  font-weight: 400;
+  font-style: italic;
+  color: rgba(255, 255, 255, 0.85);
+  margin: 0 0 24px;
+}
+
+.perfil-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.perfil-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perfil-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: rgba(196, 181, 164, 0.7);
+}
+
+.perfil-input {
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.perfil-input-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.perfil-input-wrap .dash-input {
+  flex: 1;
+  padding-right: 70px;
+}
+
+.perfil-eye {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: rgba(196, 181, 164, 0.6);
+  font-size: 0.75rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.perfil-eye:hover {
+  color: #c4b5a4;
+}
+
+.perfil-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding-top: 4px;
+}
+
+.perfil-msg {
+  font-size: 0.82rem;
+}
+
+.perfil-msg--success {
+  color: #81c784;
+}
+
+.perfil-msg--error {
+  color: #e57373;
+}
+
+@media (max-width: 640px) {
+  .perfil-card {
+    padding: 20px;
+  }
+
+  .perfil-actions {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
