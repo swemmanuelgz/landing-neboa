@@ -34,7 +34,23 @@ const Usuarios = () => {
       ? `¿Eliminar el usuario ${email}?`
       : `El usuario ${email} aún no ha aceptado la invitación. ¿Eliminar igualmente?`
     if (!window.confirm(msg)) return
-    await supabase.from('profiles').delete().eq('id', id)
+
+    const res = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/delete-user`,
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: JSON.stringify({ userId: id }),
+      }
+    )
+    const data = await res.json()
+    if (!res.ok) {
+      alert(`Error al eliminar: ${data.error}`)
+      return
+    }
     setUsuarios(prev => prev.filter(u => u.id !== id))
   }
 
