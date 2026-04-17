@@ -298,9 +298,9 @@ const Estadisticas = () => {
     setCosteByMotivo(costeMotivoArr)
   }, [allLlamadas, llamadasDesde, llamadasHasta, testPhones])
 
-  const formatDuracion = (segundos) => {
-    const m = Math.floor(segundos / 60)
-    const s = Math.round(segundos % 60)
+  const formatDuracion = (minutos) => {
+    const m = Math.floor(minutos)
+    const s = Math.round((minutos - m) * 60)
     return `${m}m ${s}s`
   }
 

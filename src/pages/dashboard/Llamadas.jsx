@@ -4,10 +4,10 @@ import './Llamadas.css'
 
 const PAGE_SIZE = 20
 
-function formatDuracion(segundos) {
-  if (segundos == null) return '—'
-  const m = Math.floor(segundos / 60)
-  const s = segundos % 60
+function formatDuracion(minutos) {
+  if (minutos == null) return '—'
+  const m = Math.floor(minutos)
+  const s = Math.round((minutos - m) * 60)
   if (m === 0) return `${s}s`
   return `${m}m ${s}s`
 }

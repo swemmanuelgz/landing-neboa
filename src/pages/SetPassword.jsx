@@ -23,8 +23,20 @@ const SetPassword = () => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) setSessionReady(true)
     })
-    return () => subscription.unsubscribe()
-  }, [])
+    // Fallback: if no session materialises within 8s (link already consumed,
+    // user pasted a bare /set-password URL, etc.), bounce to /login so the user
+    // isn't stuck on the "Verificando..." screen forever.
+    const timeout = setTimeout(() => {
+      setSessionReady(prev => {
+        if (!prev) navigate('/login', { replace: true })
+        return prev
+      })
+    }, 8000)
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
+  }, [navigate])
 
   const handleSubmit = async (e) => {
     e.preventDefault()

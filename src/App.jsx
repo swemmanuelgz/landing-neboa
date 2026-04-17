@@ -2,6 +2,7 @@ import { lazy, Suspense, useEffect } from 'react'
 import { Routes, Route, useNavigate } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
 import ProtectedRoute, { RoleRoute } from './components/ProtectedRoute/ProtectedRoute'
+import { useAuth } from './contexts/AuthContext'
 import './styles/variables.css'
 
 const Login = lazy(() => import('./pages/Login'))
@@ -17,13 +18,15 @@ const DevSettings = lazy(() => import('./pages/dashboard/DevSettings'))
 
 function App() {
   const navigate = useNavigate()
+  const { needsPasswordSetup } = useAuth()
 
+  // Redirect to /set-password when AuthContext signals an invite/recovery flow.
+  // Fires for both hash-flow (desktop legacy) and PKCE ?code= flow (mobile/modern).
   useEffect(() => {
-    const hash = window.location.hash
-    if (hash.includes('type=invite') || hash.includes('type=recovery')) {
+    if (needsPasswordSetup) {
       navigate('/set-password', { replace: true })
     }
-  }, [navigate])
+  }, [needsPasswordSetup, navigate])
 
   return (
     <Suspense fallback={<div style={{ minHeight: '100dvh', background: '#2a2a2a' }} />}>

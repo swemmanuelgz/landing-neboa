@@ -1,7 +1,12 @@
+/* =============================================
+   USUARIOS PAGE
+   ============================================= */
+
 .usuarios-dash {
   max-width: 900px;
 }
 
+/* ── Table wrapper ── */
 .usuarios-table-wrap {
   overflow-x: auto;
   border-radius: 8px;
@@ -9,6 +14,7 @@
   margin-bottom: 40px;
 }
 
+/* ── Table base ── */
 .usuarios-table {
   width: 100%;
   border-collapse: collapse;
@@ -31,6 +37,7 @@
   padding: 12px 16px;
   color: rgba(255, 255, 255, 0.85);
   border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  vertical-align: middle;
 }
 
 .usuarios-table tr:last-child td {
@@ -45,6 +52,16 @@
   color: #c4b5a4;
 }
 
+/* Email truncation on desktop (long emails in narrow columns) */
+.usuarios-email-cell {
+  display: block;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ── Invite section ── */
 .invite-section {
   background: #3a3a3a;
   border-radius: 10px;
@@ -80,6 +97,7 @@
   min-width: 180px;
 }
 
+/* ── Invite feedback messages ── */
 .invite-msg {
   margin-top: 14px;
   padding: 10px 14px;
@@ -99,6 +117,7 @@
   border: 1px solid rgba(244, 67, 54, 0.2);
 }
 
+/* ── Status badges ── */
 .user-status-badge {
   display: inline-block;
   padding: 3px 8px;
@@ -106,6 +125,7 @@
   font-size: 0.75rem;
   font-weight: 500;
   letter-spacing: 0.3px;
+  white-space: nowrap;
 }
 
 .user-status-badge--activo {
@@ -118,4 +138,189 @@
   background: rgba(255, 152, 0, 0.15);
   border: 1px solid rgba(255, 152, 0, 0.35);
   color: #ffb74d;
+}
+
+/* =============================================
+   MOBILE: table → stacked cards
+   Breakpoint matches DashboardLayout.css shell
+   ============================================= */
+
+@media (max-width: 768px) {
+
+  /* ── Page header ── */
+  .usuarios-dash .dash-page-header h1 {
+    font-size: 1.55rem;
+  }
+
+  /* ── Table wrapper: remove horizontal scroll, no outer border ── */
+  .usuarios-table-wrap {
+    overflow-x: visible;
+    border: none;
+    border-radius: 0;
+    margin-bottom: 32px;
+  }
+
+  /* ── Hide the <table> thead ── */
+  .usuarios-table thead {
+    display: none;
+  }
+
+  /* ── Turn table, tbody, tr into block layout ── */
+  .usuarios-table,
+  .usuarios-table tbody {
+    display: block;
+    width: 100%;
+  }
+
+  /* ── Each row becomes a card ── */
+  .usuarios-table tr {
+    display: block;
+    background: #3a3a3a;
+    border: 1px solid rgba(196, 181, 164, 0.1);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 12px;
+  }
+
+  .usuarios-table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+
+  .usuarios-table tr:hover td {
+    background: transparent;
+  }
+
+  .current-user-row {
+    border-color: rgba(196, 181, 164, 0.3);
+  }
+
+  /* ── Each cell becomes a labeled row inside the card ── */
+  .usuarios-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    font-size: 0.88rem;
+  }
+
+  /* Last cell in a card has no divider */
+  .usuarios-table td:last-child {
+    border-bottom: none;
+  }
+
+  /* ── data-label pseudo-element acting as the column header ── */
+  .usuarios-table td::before {
+    content: attr(data-label);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #c4b5a4;
+    font-weight: 600;
+    flex-shrink: 0;
+    margin-right: 12px;
+    min-width: 72px;
+  }
+
+  /* ── Email cell: allow wrapping on mobile, no truncation ── */
+  .usuarios-email-cell {
+    max-width: none;
+    white-space: normal;
+    word-break: break-all;
+    text-align: right;
+    flex: 1;
+  }
+
+  /* ── Role select: full right-aligned, comfortable touch target ── */
+  .usuarios-table td .dash-select {
+    min-height: 44px;
+    font-size: 0.9rem;
+    flex: 1;
+    max-width: 160px;
+    text-align: right;
+  }
+
+  /* ── Actions cell: align button to the right ── */
+  .usuarios-actions-cell {
+    padding-top: 12px !important;
+    justify-content: flex-end !important;
+  }
+
+  .usuarios-actions-cell::before {
+    display: none;
+  }
+
+  /* Bigger touch target for delete button on mobile */
+  .usuarios-table .dash-btn-danger {
+    min-height: 44px;
+    padding: 10px 18px;
+    font-size: 0.85rem;
+  }
+
+  /* ── Invite section ── */
+  .invite-section {
+    padding: 20px 16px;
+  }
+
+  .invite-section h2 {
+    font-size: 1.25rem;
+  }
+
+  .invite-form {
+    flex-direction: column;
+    gap: 12px;
+    align-items: stretch;
+  }
+
+  .invite-form .dash-input,
+  .invite-form .dash-select {
+    width: 100%;
+    min-width: 0;
+    flex: none;
+    min-height: 44px;
+    font-size: 1rem; /* 16px — prevents iOS auto-zoom */
+  }
+
+  .invite-form .dash-btn-primary {
+    width: 100%;
+    min-height: 44px;
+    font-size: 0.95rem;
+  }
+}
+
+/* =============================================
+   SMALL PHONES (≤480px) — tighten further
+   ============================================= */
+
+@media (max-width: 480px) {
+
+  .usuarios-table td {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 10px 0;
+  }
+
+  .usuarios-table td::before {
+    min-width: 0;
+    margin-right: 0;
+  }
+
+  .usuarios-email-cell {
+    text-align: left;
+    word-break: break-all;
+  }
+
+  .usuarios-table td .dash-select {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .usuarios-actions-cell {
+    align-items: flex-end !important;
+  }
+
+  .invite-section {
+    padding: 16px 14px;
+  }
 }

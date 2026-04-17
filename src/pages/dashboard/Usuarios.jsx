@@ -123,9 +123,11 @@ const Usuarios = () => {
             <tbody>
               {usuarios.map(u => (
                 <tr key={u.id} className={u.id === currentUser?.id ? 'current-user-row' : ''}>
-                  <td>{u.email}</td>
-                  <td>{u.full_name || '—'}</td>
-                  <td>
+                  <td data-label="Email">
+                    <span className="usuarios-email-cell" title={u.email}>{u.email}</span>
+                  </td>
+                  <td data-label="Nombre">{u.full_name || '—'}</td>
+                  <td data-label="Rol">
                     <select
                       value={u.role}
                       onChange={e => handleRoleChange(u.id, e.target.value)}
@@ -137,15 +139,15 @@ const Usuarios = () => {
                       {role === 'developer' ? <option value="developer">Developer</option> : null}
                     </select>
                   </td>
-                  <td>{new Date(u.created_at).toLocaleDateString('es-ES')}</td>
-                  <td>
+                  <td data-label="Alta">{new Date(u.created_at).toLocaleDateString('es-ES')}</td>
+                  <td data-label="Estado">
                     {u.email_confirmed_at ? (
                       <span className="user-status-badge user-status-badge--activo">Activo</span>
                     ) : (
                       <span className="user-status-badge user-status-badge--pendiente">Pendiente</span>
                     )}
                   </td>
-                  <td>
+                  <td data-label="Acciones" className="usuarios-actions-cell">
                     {u.id !== currentUser?.id ? (
                       <button
                         className="dash-btn-danger"
