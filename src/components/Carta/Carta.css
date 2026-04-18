@@ -21,6 +21,18 @@
   gap: 0;
 }
 
+.carta-grid--single {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  grid-template-columns: none;
+}
+
+.carta-grid--single > * {
+  width: 100%;
+  max-width: 420px;
+}
+
 .carta-item {
   display: flex;
   flex-direction: column;

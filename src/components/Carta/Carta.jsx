@@ -1,87 +1,36 @@
 import { useState } from 'react'
-import PdfModal from '../PdfModal/PdfModal'
+import CartaCarousel from './CartaCarousel'
 import ScrollReveal from '../ScrollReveal/ScrollReveal'
 import './Carta.css'
 
-// Imágenes
-import fotoDesayuno from '../../img/foto_desayuno.jpg'
 import fotoPlatos from '../../img/foto_platos.png'
-import pulpo from '../../img/pulpo.png'
-import fotoVinos from '../../img/foto_vinos.jpg'
-import fotoCocteles from '../../img/foto_cocteles.png'
-
-// PDFs
-import cartaDesayunos from '../../img/carta_desayunos.pdf'
-import cartaPrincipal from './nueva_carta/nueva_carta.pdf'
-import cartaTapeo from '../../img/carta_tapeo.pdf'
-import cartaVinos from '../../img/carta_vinos.pdf'
-import cartaCocteleria from '../../img/carta_cocteleria.pdf'
-
-const cartasData = [
-  { title: 'NUESTROS DESAYUNOS', image: fotoDesayuno, pdf: cartaDesayunos, btnText: 'Carta de desayunos' },
-  { title: 'NUESTRA CARTA', image: fotoPlatos, pdf: cartaPrincipal, btnText: 'Carta principal' },
-  { title: 'NUESTRAS TAPAS', image: pulpo, pdf: cartaTapeo, btnText: 'Carta de tapeo' },
-  { title: 'NUESTROS VINOS', image: fotoVinos, pdf: cartaVinos, btnText: 'Carta de vinos' },
-  { title: 'NUESTROS CÓCTELES', image: fotoCocteles, pdf: cartaCocteleria, btnText: 'Carta de coctelería' },
-]
 
 const Carta = () => {
-  const [pdfModal, setPdfModal] = useState({ isOpen: false, pdfUrl: '', title: '' })
-
-  const openPdfModal = (pdfUrl, title) => {
-    setPdfModal({ isOpen: true, pdfUrl, title })
-  }
-
-  const closePdfModal = () => {
-    setPdfModal({ isOpen: false, pdfUrl: '', title: '' })
-  }
+  const [carouselOpen, setCarouselOpen] = useState(false)
 
   return (
     <>
       <section id="carta" className="carta-section">
         <ScrollReveal animation="fade-up" delay={0}>
-          <h2>Nuestras Cartas</h2>
+          <h2>Nuestra Carta</h2>
         </ScrollReveal>
-        <div className="carta-grid">
-          {cartasData.slice(0, 3).map((carta, idx) => (
-            <ScrollReveal key={idx} animation="zoom-in" delay={idx * 0.1} duration={0.5}>
-              <div className="carta-item">
-                <div className="carta-header">{carta.title}</div>
-                <div 
-                  className={`carta-image ${carta.className || ''}`} 
-                  style={carta.image ? { backgroundImage: `url(${carta.image})` } : {}}
-                ></div>
-                <button onClick={() => openPdfModal(carta.pdf, carta.btnText)} className="carta-btn">
-                  {carta.btnText}
-                </button>
-              </div>
-            </ScrollReveal>
-          ))}
-        </div>
-        <div className="carta-grid">
-          {cartasData.slice(3).map((carta, idx) => (
-            <ScrollReveal key={idx} animation="zoom-in" delay={idx * 0.1} duration={0.5}>
-              <div className="carta-item">
-                <div className="carta-header">{carta.title}</div>
-                <div 
-                  className={`carta-image ${carta.className || ''}`} 
-                  style={carta.image ? { backgroundImage: `url(${carta.image})` } : {}}
-                ></div>
-                <button onClick={() => openPdfModal(carta.pdf, carta.btnText)} className="carta-btn">
-                  {carta.btnText}
-                </button>
-              </div>
-            </ScrollReveal>
-          ))}
+        <div className="carta-grid carta-grid--single">
+          <ScrollReveal animation="zoom-in" duration={0.5}>
+            <div className="carta-item">
+              <div className="carta-header">NUESTRA CARTA</div>
+              <div
+                className="carta-image"
+                style={{ backgroundImage: `url(${fotoPlatos})` }}
+              ></div>
+              <button onClick={() => setCarouselOpen(true)} className="carta-btn">
+                Ver carta
+              </button>
+            </div>
+          </ScrollReveal>
         </div>
       </section>
 
-      <PdfModal 
-        isOpen={pdfModal.isOpen} 
-        pdfUrl={pdfModal.pdfUrl} 
-        title={pdfModal.title} 
-        onClose={closePdfModal} 
-      />
+      <CartaCarousel isOpen={carouselOpen} onClose={() => setCarouselOpen(false)} />
     </>
   )
 }

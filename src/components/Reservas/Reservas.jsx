@@ -15,6 +15,7 @@ import './Reservas.css'
 
 const REQUEST_TIMEOUT = 10000
 const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reservas-proxy`
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 const CACHE_KEY = 'neboa_reserva_temporal_id'
 
 const MENSAJES = {
@@ -92,7 +93,7 @@ const Reservas = () => {
       html: `
         <p>Ha ocurrido un error al procesar tu solicitud.</p>
         <p style="margin-top: 15px;"><strong>Por favor, llámanos para hacer tu reserva:</strong></p>
-        <p style="font-size: 1.5rem; margin-top: 10px;">📞 <a href="tel:630713713" style="color: #c4b5a4; text-decoration: none;">630 713 713</a></p>
+        <p style="font-size: 1.5rem; margin-top: 10px;">📞 <a href="tel:+34988664795" style="color: #c4b5a4; text-decoration: none;">988 664 795</a></p>
       `,
       confirmButtonText: 'Entendido',
       confirmButtonColor: '#c4b5a4',
@@ -323,7 +324,7 @@ const Reservas = () => {
       // Llamar a la Edge Function (proxy seguro — no expone secrets)
       const response = await fetchWithTimeout(EDGE_FUNCTION_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
         body: JSON.stringify(requestBody)
       })
 
@@ -409,7 +410,7 @@ const Reservas = () => {
         setMensajeReserva('⏱️ El servidor no responde. Por favor, llámanos.')
         showSystemError()
       } else {
-        setMensajeReserva('❌ Error de conexión. Por favor, llámanos al 630 713 713.')
+        setMensajeReserva('❌ Error de conexión. Por favor, llámanos al 988 664 795.')
         showSystemError()
       }
     }
@@ -427,7 +428,7 @@ const Reservas = () => {
       // Segunda petición: Confirmar la reserva temporal → estado CONFIRMADO
       const response = await fetchWithTimeout(EDGE_FUNCTION_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
         body: JSON.stringify({
           reserva_fecha: pendingReserva.fechaFormateada,
           reserva_hora: pendingReserva.hora,
