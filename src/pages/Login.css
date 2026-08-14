@@ -168,3 +168,60 @@
     font-size: 1.7rem;
   }
 }
+
+@media (max-width: 480px) {
+  .login-page {
+    align-items: flex-start;
+    padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+  }
+
+  .login-card {
+    margin: auto 0;
+    padding: 28px 20px;
+    border-radius: 10px;
+  }
+
+  .login-logo {
+    width: 68px;
+    height: 68px;
+    margin-bottom: 16px;
+  }
+
+  .login-subtitle {
+    margin-bottom: 28px;
+    font-size: 0.75rem;
+    letter-spacing: 1px;
+  }
+
+  .login-field input,
+  .login-btn {
+    min-height: 44px;
+  }
+
+  .login-eye-btn {
+    min-width: 44px;
+    min-height: 44px;
+    right: 0;
+  }
+}
+
+@media (max-height: 640px) and (max-width: 480px) {
+  .login-card {
+    padding-top: 20px;
+    padding-bottom: 20px;
+  }
+
+  .login-logo {
+    width: 56px;
+    height: 56px;
+    margin-bottom: 10px;
+  }
+
+  .login-subtitle {
+    margin-bottom: 18px;
+  }
+
+  .login-form {
+    gap: 14px;
+  }
+}

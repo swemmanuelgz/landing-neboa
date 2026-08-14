@@ -232,12 +232,12 @@ const ReservasDash = () => {
                 const badge = estadoBadge(r.estado)
                 return (
                   <tr key={r.id}>
-                    <td>{r.fecha}</td>
-                    <td>{r.hora?.slice(0, 5)}</td>
-                    <td>{r.nombre}</td>
-                    <td>{r.telefono}</td>
-                    <td style={{ textAlign: 'center' }}>{r.invitados}</td>
-                    <td>
+                    <td data-label="Fecha">{r.fecha}</td>
+                    <td data-label="Hora">{r.hora?.slice(0, 5)}</td>
+                    <td data-label="Nombre">{r.nombre}</td>
+                    <td data-label="Teléfono">{r.telefono}</td>
+                    <td data-label="Personas" style={{ textAlign: 'center' }}>{r.invitados}</td>
+                    <td data-label="Estado">
                       <span
                         className="estado-badge"
                         style={{
@@ -249,9 +249,9 @@ const ReservasDash = () => {
                         {badge.label}
                       </span>
                     </td>
-                    <td className="notas-cell">{r.notas || '—'}</td>
+                    <td data-label="Notas" className="notas-cell">{r.notas || '—'}</td>
                     {role !== 'worker' ? (
-                      <td>
+                      <td data-label="Acciones">
                         {r.estado !== 'cancelada' ? (
                           <button
                             className="dash-btn-danger"

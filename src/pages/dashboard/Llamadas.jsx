@@ -278,18 +278,18 @@ const Llamadas = () => {
             <tbody>
               {llamadas.map((l) => (
                 <tr key={l.id} onClick={() => setSelectedLlamada(l)}>
-                  <td>{formatFecha(l.fecha)}</td>
-                  <td>{formatHora(l.hora)}</td>
-                  <td>{l.telefono ?? '—'}</td>
-                  <td>{formatDuracion(l.duracion)}</td>
-                  <td><MotivoBadge motivo={l.motivo_finalizacion} /></td>
-                  <td>{formatCoste(l.coste)}</td>
-                  <td>
+                  <td data-label="Fecha">{formatFecha(l.fecha)}</td>
+                  <td data-label="Hora">{formatHora(l.hora)}</td>
+                  <td data-label="Teléfono">{l.telefono ?? '—'}</td>
+                  <td data-label="Duración">{formatDuracion(l.duracion)}</td>
+                  <td data-label="Motivo"><MotivoBadge motivo={l.motivo_finalizacion} /></td>
+                  <td data-label="Coste">{formatCoste(l.coste)}</td>
+                  <td data-label="Resumen">
                     <span className="resumen-cell" title={l.resumen ?? ''}>
                       {l.resumen ?? '—'}
                     </span>
                   </td>
-                  <td>{l.reserva_id != null ? `#${l.reserva_id}` : '—'}</td>
+                  <td data-label="Reserva">{l.reserva_id != null ? `#${l.reserva_id}` : '—'}</td>
                 </tr>
               ))}
             </tbody>

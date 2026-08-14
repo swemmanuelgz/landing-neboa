@@ -259,3 +259,83 @@
   margin-left: 4px;
   opacity: 0.8;
 }
+
+@media (max-width: 600px) {
+  .llamadas-filters {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+  }
+
+  .dash-filter-label .dash-input {
+    width: 100%;
+  }
+
+  .llamadas-filters .dash-btn-outline {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .llamadas-table-wrap {
+    overflow: visible;
+    border: 0;
+    background: transparent;
+  }
+
+  .llamadas-table,
+  .llamadas-table tbody,
+  .llamadas-table tr,
+  .llamadas-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .llamadas-table thead {
+    display: none;
+  }
+
+  .llamadas-table tbody tr {
+    margin-bottom: 12px;
+    padding: 8px 14px;
+    border: 1px solid rgba(196, 181, 164, 0.15);
+    border-radius: 8px;
+    background: #3a3a3a;
+  }
+
+  .llamadas-table td {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 38px;
+    padding: 7px 0;
+    white-space: normal;
+    text-align: right;
+  }
+
+  .llamadas-table td::before {
+    content: attr(data-label);
+    flex: 0 0 82px;
+    color: #c4b5a4;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-align: left;
+    text-transform: uppercase;
+  }
+
+  .resumen-cell {
+    max-width: 60%;
+    text-align: right;
+  }
+
+  .llamadas-modal-body {
+    grid-template-columns: 1fr;
+    padding: 18px;
+    gap: 14px;
+  }
+
+  .llamadas-modal-header {
+    padding: 20px 18px 14px;
+  }
+}
