@@ -16,7 +16,9 @@ import './Reservas.css'
 const REQUEST_TIMEOUT = 10000
 const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reservas-proxy`
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
-const CACHE_KEY = 'neboa_reserva_temporal_id'
+const CACHE_KEY = 'neboa_reserva_temporal'
+// Una reserva temporal solo se puede reutilizar durante un tiempo limitado
+const CACHE_TTL_MS = 20 * 60 * 1000
 
 const MENSAJES = {
   DIA_CERRADO: '❌ Este día estamos cerrados. Por favor, selecciona otro día.',
@@ -45,24 +47,37 @@ const Reservas = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [pendingReserva, setPendingReserva] = useState(null)
   
-  // Cache del ID de reserva temporal (persiste en localStorage)
-  const [cachedReservaId, setCachedReservaId] = useState(() => {
-    // Recuperar del localStorage al inicializar
-    const saved = localStorage.getItem(CACHE_KEY)
-    if (saved) {
-      return saved
+  // Cache de la reserva temporal (persiste en localStorage).
+  // Guardamos el ID, la "firma" de la reserva (fecha/hora/personas/telefono) y
+  // la marca de tiempo. Un ID temporal SOLO se reutiliza para la MISMA reserva
+  // y durante un tiempo limitado; si no, hay que volver a pedir disponibilidad.
+  const [cachedReserva, setCachedReserva] = useState(() => {
+    try {
+      const saved = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null')
+      if (saved?.id && saved?.firma && Date.now() - (saved.ts || 0) < CACHE_TTL_MS) {
+        return saved
+      }
+    } catch {
+      // Caché corrupta o de una versión antigua: se descarta
     }
+    localStorage.removeItem(CACHE_KEY)
+    localStorage.removeItem('neboa_reserva_temporal_id')
     return null
   })
 
   // Sincronizar caché con localStorage
   useEffect(() => {
-    if (cachedReservaId) {
-      localStorage.setItem(CACHE_KEY, cachedReservaId)
+    if (cachedReserva) {
+      localStorage.setItem(CACHE_KEY, JSON.stringify(cachedReserva))
     } else {
       localStorage.removeItem(CACHE_KEY)
     }
-  }, [cachedReservaId])
+  }, [cachedReserva])
+
+  // Firma única de una reserva: si cambia algún dato, el ID temporal cacheado
+  // deja de ser válido y hay que volver a consultar disponibilidad.
+  const firmaReserva = (fecha, hora, personas, telefono) =>
+    `${fecha}|${hora}|${parseInt(personas)}|${telefono}`
 
   // Función helper para fetch con timeout
   const fetchWithTimeout = async (url, options, timeout = REQUEST_TIMEOUT) => {
@@ -280,8 +295,21 @@ const Reservas = () => {
     const fechaFormateada = `${dayNum}/${month}/${year}`
     const telefonoFormateado = reserva.telefono.startsWith('+') ? reserva.telefono : `+${reserva.telefono}`
 
-    // Si ya existe una reserva temporal en cache, mostrar modal directamente
-    if (cachedReservaId) {
+    const firmaActual = firmaReserva(reserva.fecha, reserva.hora, reserva.personas, telefonoFormateado)
+
+    // La reserva temporal cacheada solo vale si es EXACTAMENTE la misma reserva
+    // y no ha caducado. Si no, se descarta y se consulta disponibilidad de nuevo.
+    const cacheValida =
+      cachedReserva &&
+      cachedReserva.firma === firmaActual &&
+      Date.now() - (cachedReserva.ts || 0) < CACHE_TTL_MS
+
+    if (cachedReserva && !cacheValida) {
+      setCachedReserva(null)
+    }
+
+    // Si ya existe una reserva temporal válida en cache, mostrar modal directamente
+    if (cacheValida) {
       setReservaStatus('pending_confirm')
       setPendingReserva({
         nombre: reserva.nombre,
@@ -291,7 +319,7 @@ const Reservas = () => {
         telefono: telefonoFormateado,
         notas: reserva.notas,
         fechaFormateada,
-        reserva_id: cachedReservaId
+        reserva_id: cachedReserva.id
       })
       setShowConfirmModal(true)
       setMensajeReserva('')
@@ -303,7 +331,6 @@ const Reservas = () => {
 
     try {
       // Primera petición: Consultar disponibilidad
-      // Si ya existe un ID cacheado, lo enviamos para actualizar la reserva temporal existente
       const requestBody = {
         tool: 'checkAvailability',
         reserva_fecha: fechaFormateada,
@@ -316,10 +343,6 @@ const Reservas = () => {
         reserva_boolean: false  // Solo consulta, no confirma
       }
       
-      // Si hay un ID cacheado, lo enviamos para reutilizar la reserva temporal
-      if (cachedReservaId) {
-        requestBody.reserva_id = cachedReservaId
-      }
       
       // Llamar a la Edge Function (proxy seguro — no expone secrets)
       const response = await fetchWithTimeout(EDGE_FUNCTION_URL, {
@@ -333,9 +356,20 @@ const Reservas = () => {
         throw new Error(`HTTP ${response.status}`)
       }
 
-      const data = await response.json()
+      // El servidor puede devolver 200 con cuerpo vacío o con algo que no es JSON.
+      // Lo tratamos como respuesta no válida en vez de lanzar una excepción opaca.
+      const rawText = await response.text()
+      let data = null
+      try {
+        data = rawText && rawText.trim() ? JSON.parse(rawText) : null
+      } catch {
+        data = null
+      }
+      if (!data) {
+        throw new Error('RESPUESTA_INVALIDA')
+      }
 
-      const result = data.results?.[0] || data
+      const result = (Array.isArray(data) ? data[0] : data.results?.[0]) || data
       const resultText = result.result || result.message || ''
       const disponibilidad = result.disponibilidad || result.status || ''
       const reservaIdRecibido = result.reserva_id || result.id || null
@@ -343,25 +377,20 @@ const Reservas = () => {
       // IMPORTANTE: Esta es SOLO consulta de disponibilidad, NO confirmación
       // n8n debe devolver el ID de la reserva temporal
       if (disponibilidad === 'Disponible' || resultText.toLowerCase().includes('disponible') || resultText.toLowerCase().includes('temporal')) {
-        // Extraer ID de reserva temporal (o usar el cacheado si ya existe)
-        const idMatch = resultText.match(/(?:RESERVA_ID|ID)[=:\s]*([^\s.,]+)/i) || 
+        // Extraer ID de la reserva temporal que acaba de crear el servidor
+        const idMatch = resultText.match(/(?:RESERVA_ID|ID)[=:\s]*(\d+)/i) ||
                        resultText.match(/\b(\d+)\b/)
-        const newReservaId = idMatch ? idMatch[1] : reservaIdRecibido
-        
-        // Usar el ID cacheado si existe, sino usar el nuevo
-        const tempReservaId = cachedReservaId || newReservaId
-        
+        const tempReservaId = idMatch ? idMatch[1] : reservaIdRecibido
+
         if (!tempReservaId) {
           console.error('❌ No se recibió ID de reserva temporal')
           setReservaStatus('error')
           setMensajeReserva('⚠️ Error: No se recibió ID de reserva. Intenta de nuevo.')
           return
         }
-        
-        // Guardar en cache para futuras consultas
-        if (!cachedReservaId && newReservaId) {
-          setCachedReservaId(newReservaId)
-        }
+
+        // Guardar en cache (solo para ESTA reserva concreta y con caducidad)
+        setCachedReserva({ id: String(tempReservaId), firma: firmaActual, ts: Date.now() })
 
         // Guardar datos pendientes para la confirmación
         setPendingReserva({
@@ -409,6 +438,9 @@ const Reservas = () => {
       if (error.message === 'TIMEOUT') {
         setMensajeReserva('⏱️ El servidor no responde. Por favor, llámanos.')
         showSystemError()
+      } else if (error.message === 'RESPUESTA_INVALIDA') {
+        setMensajeReserva('⚠️ Respuesta no válida del servidor. Por favor, llámanos.')
+        showSystemError()
       } else {
         setMensajeReserva('❌ Error de conexión. Por favor, llámanos al 988 664 795.')
         showSystemError()
@@ -438,6 +470,7 @@ const Reservas = () => {
           reserva_notas: pendingReserva.notas || '',
           reserva_id: pendingReserva.reserva_id,  // IMPORTANTE: Mismo ID
           source: 'web',
+          tool: 'confirmReservation',  // Intención explícita para el router de n8n
           reserva_boolean: true  // ✅ CONFIRMAR DEFINITIVAMENTE
         })
       })
@@ -475,7 +508,18 @@ const Reservas = () => {
         confirmMessage = responseText
       }
 
+      // Comprobar que el servidor ha confirmado de verdad la reserva.
+      // La respuesta del flujo web son las filas actualizadas de la reserva.
+      const items = Array.isArray(data) ? data : [data]
+      const estados = items
+        .map(it => String(it?.estado || '').toLowerCase())
+        .filter(Boolean)
+      if (estados.length > 0 && !estados.includes('confirmada')) {
+        throw new Error('NO_CONFIRMADA')
+      }
+
       // Éxito - Mostrar SweetAlert con el mensaje del servidor
+      setCachedReserva(null)  // La reserva temporal ya no se puede reutilizar
       setReservaId(pendingReserva.reserva_id)
       setReservaStatus('success')
       setMensajeReserva('✅ ¡Reserva confirmada!')
@@ -502,7 +546,6 @@ const Reservas = () => {
         setMensajeReserva('')
         setReservaId(null)
         setPendingReserva(null)
-        setCachedReservaId(null)  // Limpiar cache al confirmar exitosamente
       }, 3000)
 
     } catch (error) {
@@ -511,6 +554,9 @@ const Reservas = () => {
       
       if (error.message === 'TIMEOUT') {
         setMensajeReserva('⏱️ El servidor no responde.')
+        showSystemError()
+      } else if (error.message === 'NO_CONFIRMADA') {
+        setMensajeReserva('⚠️ No hemos podido confirmar la reserva.')
         showSystemError()
       } else if (error.message.includes('vacía')) {
         setMensajeReserva('⚠️ No se recibió respuesta del servidor.')
@@ -527,7 +573,8 @@ const Reservas = () => {
     setShowConfirmModal(false)
     setPendingReserva(null)
     setReservaStatus('idle')
-    // NO limpiamos cachedReservaId aquí para poder reutilizarlo
+    // NO limpiamos la caché aquí: si el usuario vuelve a pulsar "Reservar" con
+    // los MISMOS datos, se reutiliza la misma reserva temporal en vez de crear otra.
     setMensajeReserva('ℹ️ Reserva en pausa. Tu mesa temporal sigue reservada.')
     setTimeout(() => setMensajeReserva(''), 3000)
   }
