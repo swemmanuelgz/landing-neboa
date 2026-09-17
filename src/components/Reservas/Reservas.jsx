@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import es from 'react-phone-input-2/lang/es.json'
@@ -8,17 +8,16 @@ import {
   estaDiaCerrado,
   esSoloMediodia,
   obtenerHorariosValidos,
-  formatTime,
 } from '../../hooks/useHorario'
-import { supabase } from '../../lib/supabase'
 import './Reservas.css'
 
-const REQUEST_TIMEOUT = 10000
-const EDGE_FUNCTION_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reservas-proxy`
+const REQUEST_TIMEOUT = 25000
+// Punto de entrada unico de la landing: consulta disponibilidad y crea la reserva
+// directamente contra Supabase. La Edge Function dispara despues el side effect
+// de n8n (Calendar + Gmail + WhatsApp).
+const RESERVAS_WEB_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reservas-web`
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
-const CACHE_KEY = 'neboa_reserva_temporal'
-// Una reserva temporal solo se puede reutilizar durante un tiempo limitado
-const CACHE_TTL_MS = 20 * 60 * 1000
+const SOURCE = 'web'
 
 const MENSAJES = {
   DIA_CERRADO: '❌ Este día estamos cerrados. Por favor, selecciona otro día.',
@@ -47,38 +46,6 @@ const Reservas = () => {
   const [showConfirmModal, setShowConfirmModal] = useState(false)
   const [pendingReserva, setPendingReserva] = useState(null)
   
-  // Cache de la reserva temporal (persiste en localStorage).
-  // Guardamos el ID, la "firma" de la reserva (fecha/hora/personas/telefono) y
-  // la marca de tiempo. Un ID temporal SOLO se reutiliza para la MISMA reserva
-  // y durante un tiempo limitado; si no, hay que volver a pedir disponibilidad.
-  const [cachedReserva, setCachedReserva] = useState(() => {
-    try {
-      const saved = JSON.parse(localStorage.getItem(CACHE_KEY) || 'null')
-      if (saved?.id && saved?.firma && Date.now() - (saved.ts || 0) < CACHE_TTL_MS) {
-        return saved
-      }
-    } catch {
-      // Caché corrupta o de una versión antigua: se descarta
-    }
-    localStorage.removeItem(CACHE_KEY)
-    localStorage.removeItem('neboa_reserva_temporal_id')
-    return null
-  })
-
-  // Sincronizar caché con localStorage
-  useEffect(() => {
-    if (cachedReserva) {
-      localStorage.setItem(CACHE_KEY, JSON.stringify(cachedReserva))
-    } else {
-      localStorage.removeItem(CACHE_KEY)
-    }
-  }, [cachedReserva])
-
-  // Firma única de una reserva: si cambia algún dato, el ID temporal cacheado
-  // deja de ser válido y hay que volver a consultar disponibilidad.
-  const firmaReserva = (fecha, hora, personas, telefono) =>
-    `${fecha}|${hora}|${parseInt(personas)}|${telefono}`
-
   // Función helper para fetch con timeout
   const fetchWithTimeout = async (url, options, timeout = REQUEST_TIMEOUT) => {
     const controller = new AbortController()
@@ -100,6 +67,36 @@ const Reservas = () => {
     }
   }
 
+  // Llama a la Edge Function `reservas-web` y devuelve el JSON del servidor.
+  // Lanza Error con: TIMEOUT | RESPUESTA_INVALIDA | VALIDACION:<msg> | HTTP <n>
+  const llamarReservasWeb = async (payload) => {
+    const response = await fetchWithTimeout(RESERVAS_WEB_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
+      body: JSON.stringify(payload)
+    })
+
+    const texto = await response.text()
+    let data = null
+    try {
+      data = texto && texto.trim() ? JSON.parse(texto) : null
+    } catch {
+      data = null
+    }
+
+    if (!data) throw new Error('RESPUESTA_INVALIDA')
+    if (response.status === 400 && data.error) throw new Error(`VALIDACION:${data.error}`)
+    if (!response.ok) throw new Error(`HTTP ${response.status}`)
+    return data
+  }
+
+  const mensajeDeError = (error) => {
+    if (error.message === 'TIMEOUT') return '⏱️ El servidor no responde. Por favor, llámanos al 988 664 795.'
+    if (error.message === 'RESPUESTA_INVALIDA') return '⚠️ Respuesta no válida del servidor. Por favor, llámanos.'
+    if (error.message.startsWith('VALIDACION:')) return `⚠️ ${error.message.slice('VALIDACION:'.length)}`
+    return '❌ Error de conexión. Por favor, llámanos al 988 664 795.'
+  }
+
   // Mostrar error de sistema con SweetAlert
   const showSystemError = () => {
     Swal.fire({
@@ -114,21 +111,6 @@ const Reservas = () => {
       confirmButtonColor: '#c4b5a4',
       background: '#2a2a2a',
       color: '#ffffff'
-    })
-  }
-
-  // Mostrar respuesta del servidor con SweetAlert
-  const showServerResponse = (type, title, message) => {
-    Swal.fire({
-      icon: type,
-      title: title,
-      html: message,
-      confirmButtonText: 'Aceptar',
-      confirmButtonColor: '#c4b5a4',
-      background: '#2a2a2a',
-      color: '#ffffff',
-      timer: type === 'success' ? 8000 : undefined,
-      timerProgressBar: type === 'success'
     })
   }
 
@@ -166,10 +148,6 @@ const Reservas = () => {
 
   const diasCerradosTexto = horariosPorDia
     ? [...horariosPorDia.values()].filter(d => d.cerrado).map(d => d.nombre).join(' y ')
-    : ''
-
-  const horarioCocinaTexto = configuracion
-    ? `${formatTime(configuracion.turno_mediodia_inicio)}-${formatTime(configuracion.turno_mediodia_fin)}`
     : ''
 
   // Formatear fecha para mostrar
@@ -291,246 +269,111 @@ const Reservas = () => {
       return
     }
 
-    const [year, month, dayNum] = reserva.fecha.split('-')
-    const fechaFormateada = `${dayNum}/${month}/${year}`
     const telefonoFormateado = reserva.telefono.startsWith('+') ? reserva.telefono : `+${reserva.telefono}`
-
-    const firmaActual = firmaReserva(reserva.fecha, reserva.hora, reserva.personas, telefonoFormateado)
-
-    // La reserva temporal cacheada solo vale si es EXACTAMENTE la misma reserva
-    // y no ha caducado. Si no, se descarta y se consulta disponibilidad de nuevo.
-    const cacheValida =
-      cachedReserva &&
-      cachedReserva.firma === firmaActual &&
-      Date.now() - (cachedReserva.ts || 0) < CACHE_TTL_MS
-
-    if (cachedReserva && !cacheValida) {
-      setCachedReserva(null)
-    }
-
-    // Si ya existe una reserva temporal válida en cache, mostrar modal directamente
-    if (cacheValida) {
-      setReservaStatus('pending_confirm')
-      setPendingReserva({
-        nombre: reserva.nombre,
-        fecha: reserva.fecha,
-        hora: reserva.hora,
-        personas: reserva.personas,
-        telefono: telefonoFormateado,
-        notas: reserva.notas,
-        fechaFormateada,
-        reserva_id: cachedReserva.id
-      })
-      setShowConfirmModal(true)
-      setMensajeReserva('')
-      return
-    }
 
     setReservaStatus('loading')
     setMensajeReserva('⏳ Comprobando disponibilidad...')
+    setAlternativas([])
 
     try {
-      // Primera petición: Consultar disponibilidad
-      const requestBody = {
-        tool: 'checkAvailability',
-        reserva_fecha: fechaFormateada,
-        reserva_hora: reserva.hora,
-        reserva_invitados: parseInt(reserva.personas),
-        reserva_telefono: telefonoFormateado,
-        nombre: reserva.nombre,
-        reserva_notas: reserva.notas || '',
-        source: 'web',
-        reserva_boolean: false  // Solo consulta, no confirma
-      }
-      
-      
-      // Llamar a la Edge Function (proxy seguro — no expone secrets)
-      const response = await fetchWithTimeout(EDGE_FUNCTION_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-        body: JSON.stringify(requestBody)
+      const data = await llamarReservasWeb({
+        action: 'check',
+        fecha: reserva.fecha,
+        hora: reserva.hora,
+        invitados: parseInt(reserva.personas)
       })
 
-      // Verificar que hay respuesta
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}`)
-      }
-
-      // El servidor puede devolver 200 con cuerpo vacío o con algo que no es JSON.
-      // Lo tratamos como respuesta no válida en vez de lanzar una excepción opaca.
-      const rawText = await response.text()
-      let data = null
-      try {
-        data = rawText && rawText.trim() ? JSON.parse(rawText) : null
-      } catch {
-        data = null
-      }
-      if (!data) {
-        throw new Error('RESPUESTA_INVALIDA')
-      }
-
-      const result = (Array.isArray(data) ? data[0] : data.results?.[0]) || data
-      const resultText = result.result || result.message || ''
-      const disponibilidad = result.disponibilidad || result.status || ''
-      const reservaIdRecibido = result.reserva_id || result.id || null
-
-      // IMPORTANTE: Esta es SOLO consulta de disponibilidad, NO confirmación
-      // n8n debe devolver el ID de la reserva temporal
-      if (disponibilidad === 'Disponible' || resultText.toLowerCase().includes('disponible') || resultText.toLowerCase().includes('temporal')) {
-        // Extraer ID de la reserva temporal que acaba de crear el servidor
-        const idMatch = resultText.match(/(?:RESERVA_ID|ID)[=:\s]*(\d+)/i) ||
-                       resultText.match(/\b(\d+)\b/)
-        const tempReservaId = idMatch ? idMatch[1] : reservaIdRecibido
-
-        if (!tempReservaId) {
-          console.error('❌ No se recibió ID de reserva temporal')
-          setReservaStatus('error')
-          setMensajeReserva('⚠️ Error: No se recibió ID de reserva. Intenta de nuevo.')
-          return
-        }
-
-        // Guardar en cache (solo para ESTA reserva concreta y con caducidad)
-        setCachedReserva({ id: String(tempReservaId), firma: firmaActual, ts: Date.now() })
-
-        // Guardar datos pendientes para la confirmación
+      if (data.estado === 'disponible') {
         setPendingReserva({
-          reserva_id: tempReservaId,
           fecha: reserva.fecha,
-          fechaFormateada,
+          fechaFormateada: formatearFechaDisplay(reserva.fecha),
           hora: reserva.hora,
           personas: reserva.personas,
-          nombre: reserva.nombre,
+          nombre: reserva.nombre.trim(),
           telefono: telefonoFormateado,
-          notas: reserva.notas || ''
+          notas: reserva.notas || '',
+          turno: data.turno
         })
-        
         setReservaStatus('pending_confirm')
         setMensajeReserva('')
         setShowConfirmModal(true)
 
-      } else if (resultText.includes('pero tenemos huecos') || resultText.includes('alternativas') || disponibilidad === 'Alternativas') {
-        const altArray = result.alternativas || []
-        if (altArray.length > 0) {
-          setAlternativas(altArray)
-        } else {
-          const horasMatch = resultText.match(/a las ([0-9:,\s]+)/i)
-          if (horasMatch) {
-            const horas = horasMatch[1].split(',').map(h => h.trim()).filter(h => h)
-            setAlternativas(horas)
-          }
-        }
+      } else if (data.estado === 'alternativas') {
+        setAlternativas(Array.isArray(data.alternativas) ? data.alternativas : [])
         setReservaStatus('alternatives')
-        setMensajeReserva(`⚠️ No hay disponibilidad a las ${reserva.hora}`)
+        setMensajeReserva(data.mensaje || `⚠️ No hay disponibilidad a las ${reserva.hora}`)
 
-      } else if (resultText.includes('No hay disponibilidad') || disponibilidad === 'No Disponible') {
-        setReservaStatus('full')
-        setMensajeReserva('❌ Lo sentimos, no hay disponibilidad para este día. Prueba con otra fecha.')
+      } else if (data.estado === 'grupo_grande') {
+        setReservaStatus('error')
+        setMensajeReserva(data.mensaje || '⚠️ Para grupos grandes, llámanos.')
+        Swal.fire({
+          icon: 'info',
+          title: '👥 Grupo grande',
+          html: `<p>${data.mensaje || 'Para grupos grandes hay que reservar por teléfono.'}</p>
+                 <p style="font-size:1.4rem;margin-top:12px;">📞 <a href="tel:+34988664795" style="color:#c4b5a4;text-decoration:none;">988 664 795</a></p>`,
+          confirmButtonText: 'Entendido',
+          confirmButtonColor: '#c4b5a4',
+          background: '#2a2a2a',
+          color: '#ffffff'
+        })
 
       } else {
-        setReservaStatus('error')
-        setMensajeReserva('⚠️ Error al procesar la reserva. Intenta de nuevo o llámanos.')
+        setReservaStatus('full')
+        setMensajeReserva(data.mensaje || '❌ No hay disponibilidad para ese día. Prueba con otra fecha.')
       }
 
     } catch (error) {
-      console.error('Error al conectar con el servidor:', error)
+      console.error('Error al consultar disponibilidad:', error)
       setReservaStatus('error')
-      
-      if (error.message === 'TIMEOUT') {
-        setMensajeReserva('⏱️ El servidor no responde. Por favor, llámanos.')
-        showSystemError()
-      } else if (error.message === 'RESPUESTA_INVALIDA') {
-        setMensajeReserva('⚠️ Respuesta no válida del servidor. Por favor, llámanos.')
-        showSystemError()
-      } else {
-        setMensajeReserva('❌ Error de conexión. Por favor, llámanos al 988 664 795.')
-        showSystemError()
-      }
+      setMensajeReserva(mensajeDeError(error))
+      showSystemError()
     }
   }
 
-  // PASO 2: Confirmar reserva definitivamente (cambiar de TEMPORAL a CONFIRMADO)
+  // PASO 2: Crear la reserva definitiva en Supabase
   const confirmarReserva = async () => {
     if (!pendingReserva) return
-    
+
     setShowConfirmModal(false)
     setReservaStatus('loading')
-    setMensajeReserva('⏳ Confirmando tu reserva...')
+    setMensajeReserva('⏳ Creando tu reserva...')
 
     try {
-      // Segunda petición: Confirmar la reserva temporal → estado CONFIRMADO
-      const response = await fetchWithTimeout(EDGE_FUNCTION_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_ANON_KEY },
-        body: JSON.stringify({
-          reserva_fecha: pendingReserva.fechaFormateada,
-          reserva_hora: pendingReserva.hora,
-          reserva_invitados: parseInt(pendingReserva.personas),
-          reserva_telefono: pendingReserva.telefono,
-          nombre: pendingReserva.nombre,
-          reserva_notas: pendingReserva.notas || '',
-          reserva_id: pendingReserva.reserva_id,  // IMPORTANTE: Mismo ID
-          source: 'web',
-          tool: 'confirmReservation',  // Intención explícita para el router de n8n
-          reserva_boolean: true  // ✅ CONFIRMAR DEFINITIVAMENTE
-        })
+      const data = await llamarReservasWeb({
+        action: 'create',
+        fecha: pendingReserva.fecha,
+        hora: pendingReserva.hora,
+        invitados: parseInt(pendingReserva.personas),
+        nombre: pendingReserva.nombre,
+        telefono: pendingReserva.telefono,
+        notas: pendingReserva.notas || '',
+        source: SOURCE
       })
 
-      // Verificar que la petición fue exitosa
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
-      }
-
-      // Leer respuesta como texto primero
-      const responseText = await response.text()
-      
-      if (!responseText || !responseText.trim()) {
-        throw new Error('Respuesta vacía del servidor')
-      }
-
-      // Parsear JSON
-      let data = null
-      let confirmMessage = ''
-      
-      try {
-        data = JSON.parse(responseText)
-        
-        // Extraer mensaje del body si es respuesta de Twilio
-        if (Array.isArray(data) && data[0]?.body) {
-          confirmMessage = data[0].body
-        } else if (data.body) {
-          confirmMessage = data.body
-        } else if (data.message) {
-          confirmMessage = data.message
-        } else if (data.result) {
-          confirmMessage = data.result
+      // La mesa pudo ocuparse entre la consulta y la confirmación
+      if (data.estado !== 'reserva_creada') {
+        if (data.estado === 'alternativas') {
+          setAlternativas(Array.isArray(data.alternativas) ? data.alternativas : [])
+          setReservaStatus('alternatives')
+          setMensajeReserva(data.mensaje || '⚠️ Esa hora acaba de ocuparse. Elige otra.')
+        } else {
+          setReservaStatus('full')
+          setMensajeReserva(data.mensaje || '❌ Esa mesa acaba de ocuparse. Prueba con otra hora.')
         }
-      } catch {
-        confirmMessage = responseText
+        setPendingReserva(null)
+        return
       }
 
-      // Comprobar que el servidor ha confirmado de verdad la reserva.
-      // La respuesta del flujo web son las filas actualizadas de la reserva.
-      const items = Array.isArray(data) ? data : [data]
-      const estados = items
-        .map(it => String(it?.estado || '').toLowerCase())
-        .filter(Boolean)
-      if (estados.length > 0 && !estados.includes('confirmada')) {
-        throw new Error('NO_CONFIRMADA')
-      }
-
-      // Éxito - Mostrar SweetAlert con el mensaje del servidor
-      setCachedReserva(null)  // La reserva temporal ya no se puede reutilizar
-      setReservaId(pendingReserva.reserva_id)
+      setReservaId(data.reserva_id)
       setReservaStatus('success')
       setMensajeReserva('✅ ¡Reserva confirmada!')
 
-      // Mostrar modal de éxito con SweetAlert
       Swal.fire({
         icon: 'success',
         title: '🎉 ¡Reserva confirmada!',
-        text: confirmMessage
-          ? confirmMessage
-          : `Tu reserva ha sido confirmada correctamente. ID de reserva: ${pendingReserva.reserva_id}. Recibirás un WhatsApp de confirmación en breve.`,
+        html: `<p>${data.mensaje || 'Tu reserva ha quedado registrada.'}</p>
+               <p style="margin-top:12px;">📋 ID de reserva: <strong>${data.reserva_id}</strong></p>
+               <p style="margin-top:8px;">Recibirás un WhatsApp de confirmación en breve.</p>`,
         confirmButtonText: '¡Genial!',
         confirmButtonColor: '#c4b5a4',
         background: '#2a2a2a',
@@ -538,8 +381,7 @@ const Reservas = () => {
         timer: 15000,
         timerProgressBar: true
       })
-      
-      // Limpiar cache y formulario después de 3 segundos
+
       setTimeout(() => {
         setReserva({ nombre: '', telefono: '', fecha: '', hora: '', personas: '', notas: '' })
         setReservaStatus('idle')
@@ -549,33 +391,19 @@ const Reservas = () => {
       }, 3000)
 
     } catch (error) {
-      console.error('❌ Error al confirmar reserva:', error)
+      console.error('❌ Error al crear la reserva:', error)
       setReservaStatus('error')
-      
-      if (error.message === 'TIMEOUT') {
-        setMensajeReserva('⏱️ El servidor no responde.')
-        showSystemError()
-      } else if (error.message === 'NO_CONFIRMADA') {
-        setMensajeReserva('⚠️ No hemos podido confirmar la reserva.')
-        showSystemError()
-      } else if (error.message.includes('vacía')) {
-        setMensajeReserva('⚠️ No se recibió respuesta del servidor.')
-        showSystemError()
-      } else {
-        setMensajeReserva('❌ Error al confirmar. Por favor, llámanos.')
-        showSystemError()
-      }
+      setMensajeReserva(mensajeDeError(error))
+      showSystemError()
     }
   }
 
-  // Cancelar confirmación (mantiene el ID cacheado para reutilizar)
+  // Cancelar confirmación
   const cancelarConfirmacion = () => {
     setShowConfirmModal(false)
     setPendingReserva(null)
     setReservaStatus('idle')
-    // NO limpiamos la caché aquí: si el usuario vuelve a pulsar "Reservar" con
-    // los MISMOS datos, se reutiliza la misma reserva temporal en vez de crear otra.
-    setMensajeReserva('ℹ️ Reserva en pausa. Tu mesa temporal sigue reservada.')
+    setMensajeReserva('ℹ️ Reserva cancelada. No se ha guardado nada.')
     setTimeout(() => setMensajeReserva(''), 3000)
   }
 
