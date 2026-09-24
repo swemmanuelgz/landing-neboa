@@ -34,3 +34,9 @@ dist-ssr
 .gitignore
 .gitignore
 .agents/skills/supabase/SKILL.md
+.vercel
+.env*
+
+# Herramientas locales / temporales
+.codex/
+supabase/.temp/

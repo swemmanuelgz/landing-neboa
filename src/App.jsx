@@ -9,6 +9,7 @@ const Login = lazy(() => import('./pages/Login'))
 const SetPassword = lazy(() => import('./pages/SetPassword'))
 const DashboardLayout = lazy(() => import('./pages/dashboard/DashboardLayout'))
 const ReservasDash = lazy(() => import('./pages/dashboard/ReservasDash'))
+const ReservasHoy = lazy(() => import('./pages/dashboard/ReservasHoy'))
 const Estadisticas = lazy(() => import('./pages/dashboard/Estadisticas'))
 const Usuarios = lazy(() => import('./pages/dashboard/Usuarios'))
 const Llamadas = lazy(() => import('./pages/dashboard/Llamadas'))
@@ -38,6 +39,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<ReservasDash />} />
             <Route path="reservas" element={<ReservasDash />} />
+            <Route path="hoy" element={<ReservasHoy />} />
             <Route path="estadisticas" element={<Estadisticas />} />
             <Route path="llamadas" element={<Llamadas />} />
             <Route path="perfil" element={<Perfil />} />

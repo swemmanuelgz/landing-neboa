@@ -62,6 +62,13 @@ const DashboardLayout = () => {
               </svg>
             ) : 'Reservas'}
           </NavLink>
+          <NavLink to="/dashboard/hoy" className={navClass} onClick={closeMobileMenu} title="Reservas de hoy">
+            {collapsed && !mobileMenuOpen ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 8v4l2.5 2.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            ) : 'Reservas de hoy'}
+          </NavLink>
           <NavLink to="/dashboard/estadisticas" className={navClass} onClick={closeMobileMenu} title="Estadísticas">
             {collapsed && !mobileMenuOpen ? (
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
