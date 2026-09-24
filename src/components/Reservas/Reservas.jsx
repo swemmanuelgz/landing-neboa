@@ -364,15 +364,18 @@ const Reservas = () => {
         return
       }
 
-      setReservaId(data.reserva_id)
+      setReservaId(data.codigo || data.reserva_id)
       setReservaStatus('success')
       setMensajeReserva('✅ ¡Reserva confirmada!')
 
+      const localizador = data.codigo || data.reserva_id
       Swal.fire({
         icon: 'success',
         title: '🎉 ¡Reserva confirmada!',
         html: `<p>${data.mensaje || 'Tu reserva ha quedado registrada.'}</p>
-               <p style="margin-top:12px;">📋 ID de reserva: <strong>${data.reserva_id}</strong></p>
+               <p style="margin-top:12px;">📋 Localizador: <strong>${localizador}</strong></p>
+               ${data.mesa ? `<p style="margin-top:8px;">🪑 Mesa <strong>${data.mesa}</strong></p>` : ''}
+               <p style="margin-top:8px;">Guárdalo: lo necesitarás para cambiar o cancelar la reserva.</p>
                <p style="margin-top:8px;">Recibirás un WhatsApp de confirmación en breve.</p>`,
         confirmButtonText: '¡Genial!',
         confirmButtonColor: '#c4b5a4',
@@ -539,7 +542,7 @@ const Reservas = () => {
           )}
           
           {reservaStatus === 'success' && reservaId && (
-            <p className="reserva-id">📋 ID de reserva: <strong>{reservaId}</strong></p>
+            <p className="reserva-id">📋 Localizador: <strong>{reservaId}</strong></p>
           )}
         </form>
         <p className="reserva-note">No se pueden hacer reservas para el día en curso.</p>

@@ -1,18 +1,26 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
 /**
- * reservas-web
- * Punto de entrada UNICO de la landing para reservar.
+ * reservas-web  ·  landing de Restaurante Neboa
  *
- *   { action: "check",  fecha, hora, invitados }
- *   { action: "create", fecha, hora, invitados, nombre, telefono, notas?, source }
+ * Neboa ya NO guarda sus reservas en este proyecto: vive en la plataforma
+ * nexum-restaurant (restaurante id 3). Esta funcion es el unico punto de
+ * entrada de la landing y actua de adaptador:
  *
- * `check`  -> RPC verificar_disponibilidad
- * `create` -> RPC crear_reserva (revalida disponibilidad dentro de la transaccion)
- *             y, si source es web/landing, dispara el side effect en n8n
- *             (NEBOA-RESERVAS-SIDEFFECT: Google Calendar + Gmail + WhatsApp).
+ *   { action:"check",  fecha, hora, invitados }
+ *   { action:"create", fecha, hora, invitados, nombre, telefono, notas?, source }
  *
- * No toca el workflow del agente de voz.
+ *        landing  ->  reservas-web  ->  nexum  agent-check-availability
+ *                                   ->  nexum  agent-create-reservation
+ *                                   ->  n8n    NEBOA-RESERVAS-SIDEFFECT
+ *                                              (Calendar + Gmail + WhatsApp)
+ *
+ * El token de agente de nexum (NEXUM_AGENT_TOKEN) vive SOLO aqui, como secreto
+ * de la Edge Function. Nunca se expone al navegador ni viaja en el bundle.
+ *
+ * Se conserva el contrato de respuesta que ya consume la landing
+ * (estado: disponible | alternativas | grupo_grande | no_disponible |
+ *  reserva_creada) para no acoplarla al vocabulario interno de nexum.
  */
 
 const corsHeaders = {
@@ -22,6 +30,7 @@ const corsHeaders = {
 };
 
 const SIDEEFFECT_TIMEOUT_MS = 20_000;
+const NEXUM_TIMEOUT_MS = 20_000;
 const MAX_INVITADOS = 20;
 const MAX_DIAS_ANTELACION = 30;
 const WEB_SOURCES = new Set(["web", "landing", "landing_web"]);
@@ -58,7 +67,9 @@ type Validado = {
   hora: string;
   invitados: number;
   nombre: string;
+  /** Formato canonico de nexum: prefijo de pais SIN '+' (34632079379). */
   telefono: string;
+  telefonoE164: string;
   notas: string;
   source: string;
 };
@@ -91,7 +102,7 @@ function validar(body: Record<string, unknown>, crear: boolean): Validado | stri
 
     const digitos = String(body.telefono ?? "").replace(/[^0-9]/g, "");
     if (digitos.length < 8 || digitos.length > 15) return "telefono invalido";
-    telefono = "+" + digitos;
+    telefono = digitos;
 
     notas = String(body.notas ?? "").trim().slice(0, 500);
   }
@@ -102,58 +113,75 @@ function validar(body: Record<string, unknown>, crear: boolean): Validado | stri
     invitados,
     nombre,
     telefono,
+    telefonoE164: telefono ? "+" + telefono : "",
     notas,
     source: String(body.source ?? "web").trim().toLowerCase(),
   };
 }
 
-async function rpc(name: string, args: Record<string, unknown>) {
-  const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  const res = await fetch(`${url}/rest/v1/rpc/${name}`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: key!,
-      Authorization: `Bearer ${key}`,
-    },
-    body: JSON.stringify(args),
-  });
-  const texto = await res.text();
-  let data: unknown = null;
-  try {
-    data = texto ? JSON.parse(texto) : null;
-  } catch {
-    data = texto;
+/** Llama a una Edge Function de nexum con el token de agente del restaurante. */
+async function nexum(fn: string, payload: Record<string, unknown>) {
+  const base = Deno.env.get("NEXUM_URL");
+  const token = Deno.env.get("NEXUM_AGENT_TOKEN");
+  if (!base || !token) {
+    return { ok: false, status: 500, data: { error: "nexum no configurado" } };
   }
-  return { ok: res.ok, status: res.status, data };
-}
 
-/** Guarda el id del evento de Calendar en la reserva. Best effort. */
-async function guardarEventoCalendar(reservaId: number, eventId: string) {
-  const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  const controller = new AbortController();
+  const t = setTimeout(() => controller.abort(), NEXUM_TIMEOUT_MS);
   try {
-    await fetch(`${url}/rest/v1/reservas?id=eq.${reservaId}`, {
-      method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-        apikey: key!,
-        Authorization: `Bearer ${key}`,
-        Prefer: "return=minimal",
-      },
-      body: JSON.stringify({ calendar_event_id: eventId }),
+    const res = await fetch(`${base.replace(/\/$/, "")}/functions/v1/${fn}`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
     });
-  } catch (_e) { /* no es critico */ }
+    const texto = await res.text();
+    let data: Record<string, unknown> = {};
+    try {
+      data = texto ? JSON.parse(texto) : {};
+    } catch {
+      data = { raw: texto };
+    }
+    return { ok: res.ok, status: res.status, data };
+  } catch (e) {
+    return { ok: false, status: 504, data: { error: e instanceof Error ? e.message : "fallo de red" } };
+  } finally {
+    clearTimeout(t);
+  }
 }
 
-/** Dispara NEBOA-RESERVAS-SIDEFFECT. Nunca lanza: la reserva ya esta creada. */
+/**
+ * Traduce la respuesta de nexum al vocabulario que ya entiende la landing.
+ * nexum: { available, reason, message, alternatives? }
+ */
+function traducirDisponibilidad(v: Validado, d: Record<string, unknown>) {
+  const disponible = d.available === true;
+  const reason = String(d.reason ?? "");
+  const alternativas = Array.isArray(d.alternatives) ? d.alternatives : [];
+
+  let estado = "no_disponible";
+  if (disponible) estado = "disponible";
+  else if (reason === "party_too_large") estado = "grupo_grande";
+  else if (alternativas.length > 0) estado = "alternativas";
+
+  return {
+    estado,
+    fecha: v.fecha,
+    hora: v.hora,
+    invitados: v.invitados,
+    turno: d.shift ?? null,
+    mensaje: d.message ?? null,
+    alternativas,
+    motivo: reason,
+  };
+}
+
+/** Dispara NEBOA-RESERVAS-SIDEFFECT. Nunca lanza: la reserva ya existe. */
 async function dispararSideEffect(payload: Record<string, unknown>) {
   const url = Deno.env.get("N8N_SIDEEFFECT_URL");
   const jwt = Deno.env.get("N8N_JWT_SECRET");
-  if (!url || !jwt) {
-    return { ok: false, error: "side effect no configurado" };
-  }
+  if (!url || !jwt) return { ok: false, error: "side effect no configurado" };
 
   const controller = new AbortController();
   const t = setTimeout(() => controller.abort(), SIDEEFFECT_TIMEOUT_MS);
@@ -190,7 +218,7 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
   if (req.method !== "POST") return json({ ok: false, error: "metodo no permitido" }, 405);
 
-  if (!Deno.env.get("SUPABASE_URL") || !Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")) {
+  if (!Deno.env.get("NEXUM_URL") || !Deno.env.get("NEXUM_AGENT_TOKEN")) {
     return json({ ok: false, error: "configuracion del servidor incompleta" }, 500);
   }
 
@@ -209,52 +237,71 @@ Deno.serve(async (req) => {
 
   // ---- CHECK -------------------------------------------------------------
   if (action === "check") {
-    const r = await rpc("verificar_disponibilidad", {
-      p_fecha: v.fecha,
-      p_hora: v.hora,
-      p_invitados: v.invitados,
+    const r = await nexum("agent-check-availability", {
+      date: v.fecha,
+      time: v.hora,
+      party_size: v.invitados,
     });
-    if (!r.ok) return json({ ok: false, error: "no se pudo consultar disponibilidad" }, 502);
-    return json(r.data);
+    if (!r.ok) {
+      return json({ ok: false, error: "no se pudo consultar disponibilidad", detalle: r.data }, 502);
+    }
+    return json(traducirDisponibilidad(v, r.data));
   }
 
   // ---- CREATE ------------------------------------------------------------
-  const r = await rpc("crear_reserva", {
-    p_fecha: v.fecha,
-    p_hora: v.hora,
-    p_invitados: v.invitados,
-    p_nombre: v.nombre,
-    p_telefono: v.telefono,
-    p_notas: v.notas,
-    p_estado: "confirmada",
+  const r = await nexum("agent-create-reservation", {
+    date: v.fecha,
+    time: v.hora,
+    party_size: v.invitados,
+    phone: v.telefono,
+    name: v.nombre,
+    notes: v.notas || null,
+    source: "web",
   });
-  if (!r.ok) return json({ ok: false, error: "no se pudo crear la reserva" }, 502);
-
-  const data = (r.data ?? {}) as Record<string, unknown>;
-  if (data.estado !== "reserva_creada") {
-    // Sin hueco: devolvemos tal cual el resultado de disponibilidad.
-    return json(data);
+  if (!r.ok) {
+    return json({ ok: false, error: "no se pudo crear la reserva", detalle: r.data }, 502);
   }
 
+  const d = r.data;
+
+  // Rechazo de negocio: nexum contesta 200 con ok:false y un mensaje ya
+  // redactado en castellano. Se traduce al mismo vocabulario que `check`.
+  if (d.ok !== true || d.created !== true) {
+    return json(traducirDisponibilidad(v, d));
+  }
+
+  const reserva = (d.reservation ?? {}) as Record<string, unknown>;
+  const salida = {
+    estado: "reserva_creada",
+    reserva_id: reserva.id,
+    codigo: reserva.code ?? null,
+    mesa: reserva.table_code ?? null,
+    fecha: v.fecha,
+    hora: v.hora,
+    invitados: v.invitados,
+    nombre: v.nombre,
+    telefono: v.telefonoE164,
+    mensaje: d.message ?? null,
+    alternativas: [],
+  };
+
   if (!WEB_SOURCES.has(v.source)) {
-    return json({ ...data, sideeffect: { ok: false, error: "source no web, side effect omitido" } });
+    return json({ ...salida, sideeffect: { ok: false, error: "source no web, side effect omitido" } });
   }
 
   const sideeffect = await dispararSideEffect({
-    reserva_id: data.reserva_id,
+    reserva_id: reserva.id,
+    codigo: reserva.code ?? null,
+    mesa: reserva.table_code ?? null,
     nombre: v.nombre,
-    telefono: v.telefono,
+    telefono: v.telefonoE164,
     fecha: v.fecha,
     hora: v.hora,
     invitados: v.invitados,
     notas: v.notas,
-    turno: data.turno,
+    turno: reserva.shift ?? null,
     source: v.source,
   });
 
-  if (sideeffect.ok && sideeffect.calendar_event_id) {
-    await guardarEventoCalendar(Number(data.reserva_id), String(sideeffect.calendar_event_id));
-  }
-
-  return json({ ...data, sideeffect });
+  return json({ ...salida, sideeffect });
 });
