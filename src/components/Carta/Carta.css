@@ -91,6 +91,20 @@
   transform: translateY(-2px);
 }
 
+.carta-menu-dia-link {
+  margin-top: 14px;
+  padding: 6px 4px;
+  border: 0;
+  background: transparent;
+  color: var(--color-beige-light);
+  font-size: 0.9rem;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+  cursor: pointer;
+}
+
+.carta-menu-dia-link:hover { color: var(--color-white); }
+
 /* ==================== RESPONSIVE ==================== */
 @media (max-width: 1024px) {
   .carta-grid {

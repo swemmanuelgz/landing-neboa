@@ -4,7 +4,6 @@ export { default as Hero } from './Hero/Hero';
 export { default as AdSenseAutoAds } from './AdSenseAutoAds/AdSenseAutoAds';
 export { default as Bienvenida } from './Bienvenida/Bienvenida';
 export { default as Carta } from './Carta/Carta';
-export { default as PdfModal } from './PdfModal/PdfModal';
 export { default as Galeria } from './Galeria/Galeria';
 export { default as Eventos } from './Eventos/Eventos';
 export { default as Reservas } from './Reservas/Reservas';
