@@ -9,10 +9,15 @@
 .nosotros-images {
   display: flex;
   flex-direction: column;
+  /* Item de grid: sin esto su ancho minimo es el de las fotos y desborda en movil. */
+  min-width: 0;
 }
 
 .nosotros-images img {
-  flex: 1;
+  flex: 1 1 0;
+  /* Item flex: sin min-width 0 la foto no encoge por debajo de su tamano natural. */
+  min-width: 0;
+  min-height: 0;
   object-fit: cover;
   width: 100%;
 }
