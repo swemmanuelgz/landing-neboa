@@ -1,69 +1,113 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+
+// El horario vive en nexum-restaurant. La landing lo lee a través de /api/horario
+// (función serverless de Vercel que llama a agent-restaurant-info con el token del
+// restaurante; el token nunca llega al navegador).
+const HORARIO_URL = '/api/horario'
+
+const NOMBRES_DIA = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+const hhmm = (t) => (t ? String(t).slice(0, 5) : null)
 
 /**
- * Fetches schedule data from Supabase:
- *  - horarios_semanales: one row per day (0=Sun … 6=Sat), cerrado + solo_mediodia flags
- *  - configuracion_restaurante: turno times and display times
- *  - excepciones_calendario: one-off open/closed/cena_especial dates
- *
- * Returns a Map keyed by dia_semana (0-6) for O(1) day lookup plus helpers.
+ * Pasa una excepción de nexum al vocabulario de la landing.
+ * nexum: { date, type: 'cierre' | 'cena_especial' | 'aforo_reducido' | 'otro', closed, description }
+ * landing: 'cerrado' | 'cena_especial' (aforo_reducido / otro se pueden reservar con normalidad).
  */
+function tipoExcepcion(e) {
+  if (e.closed === true || e.type === 'cierre') return 'cerrado'
+  if (e.type === 'cena_especial') return 'cena_especial'
+  return null
+}
+
+/**
+ * Adapta la respuesta de /api/horario a las estructuras que ya usan Horario y Reservas:
+ *  - horariosPorDia: Map<dia_semana, { dia_semana, nombre, cerrado, solo_mediodia }>
+ *  - configuracion: { turno_mediodia_inicio/fin, turno_noche_inicio/fin }
+ *  - excepcionesPorFecha: Map<'YYYY-MM-DD', 'abierto' | 'cerrado' | 'cena_especial'>
+ */
+export function adaptarHorario(d) {
+  const horariosPorDia = new Map(
+    (d.weekly || []).map((w) => [
+      Number(w.dow),
+      {
+        dia_semana: Number(w.dow),
+        nombre: w.name || NOMBRES_DIA[Number(w.dow)],
+        cerrado: w.closed === true,
+        solo_mediodia: w.lunch_only === true,
+      },
+    ]),
+  )
+
+  const turno = (tipo) => (d.shifts || []).find((s) => s.type === tipo) || null
+  const mediodia = turno('mediodia')
+  const noche = turno('noche')
+  const configuracion = {
+    turno_mediodia_inicio: hhmm(mediodia?.from),
+    turno_mediodia_fin: hhmm(mediodia?.to),
+    turno_noche_inicio: hhmm(noche?.from),
+    turno_noche_fin: hhmm(noche?.to),
+  }
+
+  const excepcionesPorFecha = new Map()
+  for (const e of d.exceptions || []) {
+    const fecha = String(e.date ?? '').slice(0, 10)
+    const tipo = tipoExcepcion(e)
+    if (/^\d{4}-\d{2}-\d{2}$/.test(fecha) && tipo) excepcionesPorFecha.set(fecha, tipo)
+  }
+
+  return { horariosPorDia, configuracion, excepcionesPorFecha }
+}
+
+// Una sola petición por carga de página aunque haya varios componentes usando el hook.
+let peticion = null
+function pedirHorario() {
+  if (!peticion) {
+    peticion = fetch(HORARIO_URL, { headers: { Accept: 'application/json' } })
+      .then(async (res) => {
+        const data = await res.json().catch(() => null)
+        if (!res.ok || !data || data.ok !== true) throw new Error(data?.error || `HTTP ${res.status}`)
+        return adaptarHorario(data)
+      })
+      .catch((e) => {
+        peticion = null // permite reintentar en el siguiente montaje
+        throw e
+      })
+  }
+  return peticion
+}
+
 export const useHorario = () => {
-  const [horariosPorDia, setHorariosPorDia] = useState(null)   // Map<dia_semana, row>
-  const [configuracion, setConfiguracion] = useState(null)
-  const [excepcionesPorFecha, setExcepcionesPorFecha] = useState(null) // Map<'YYYY-MM-DD', tipo>
-  const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [estado, setEstado] = useState({
+    horariosPorDia: null,
+    configuracion: null,
+    excepcionesPorFecha: null,
+    loading: true,
+    error: null,
+  })
 
   useEffect(() => {
-    const fetchAll = async () => {
-      try {
-        const today = new Date().toISOString().split('T')[0]
-
-        const [horariosRes, configRes, excepcionesRes] = await Promise.all([
-          supabase.from('horarios_semanales').select('*').order('dia_semana'),
-          supabase.from('configuracion_restaurante').select('*').eq('id', 1).single(),
-          supabase
-            .from('excepciones_calendario')
-            .select('*')
-            .gte('fecha', today)
-            .order('fecha'),
-        ])
-
-        if (horariosRes.error) throw horariosRes.error
-        if (configRes.error) throw configRes.error
-        if (excepcionesRes.error) throw excepcionesRes.error
-
-        // Build Maps for O(1) lookups
-        const diasMap = new Map(horariosRes.data.map(h => [h.dia_semana, h]))
-        const excepMap = new Map(excepcionesRes.data.map(e => [e.fecha, e.tipo]))
-
-        setHorariosPorDia(diasMap)
-        setConfiguracion(configRes.data)
-        setExcepcionesPorFecha(excepMap)
-      } catch (err) {
+    let vivo = true
+    pedirHorario()
+      .then((h) => vivo && setEstado({ ...h, loading: false, error: null }))
+      .catch((err) => {
         console.error('useHorario: error cargando horarios', err)
-        setError(err)
-      } finally {
-        setLoading(false)
-      }
-    }
-
-    fetchAll()
+        if (vivo) setEstado((s) => ({ ...s, loading: false, error: err }))
+      })
+    return () => { vivo = false }
   }, [])
 
-  return { horariosPorDia, configuracion, excepcionesPorFecha, loading, error }
+  return estado
 }
 
 // ─── Pure helpers (exported so Reservas.jsx can use them) ──────────────────
 
 /** Formatea 'HH:MM:SS' → 'HH:MM' */
-export const formatTime = (t) => (t ? t.slice(0, 5) : '')
+export const formatTime = (t) => (t ? String(t).slice(0, 5) : '')
 
 /** Genera slots cada 30 min entre inicio y fin (inclusive) */
 export const generarHoras = (inicio, fin) => {
   const horas = []
+  if (!inicio || !fin) return horas
   let [h, m] = inicio.split(':').map(Number)
   const [finH, finM] = fin.split(':').map(Number)
   while (h < finH || (h === finH && m <= finM)) {

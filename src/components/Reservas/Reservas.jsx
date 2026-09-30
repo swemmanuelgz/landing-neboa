@@ -12,11 +12,10 @@ import {
 import './Reservas.css'
 
 const REQUEST_TIMEOUT = 25000
-// Punto de entrada unico de la landing: consulta disponibilidad y crea la reserva
-// directamente contra Supabase. La Edge Function dispara despues el side effect
-// de n8n (Calendar + Gmail + WhatsApp).
-const RESERVAS_WEB_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/reservas-web`
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+// Punto de entrada unico de la landing: /api/reservas (funcion serverless de Vercel)
+// consulta disponibilidad y crea la reserva en nexum-restaurant, y despues dispara
+// el side effect de n8n. El token de nexum nunca llega al navegador.
+const RESERVAS_URL = '/api/reservas'
 const SOURCE = 'web'
 
 const MENSAJES = {
@@ -67,12 +66,12 @@ const Reservas = () => {
     }
   }
 
-  // Llama a la Edge Function `reservas-web` y devuelve el JSON del servidor.
+  // Llama a /api/reservas y devuelve el JSON del servidor.
   // Lanza Error con: TIMEOUT | RESPUESTA_INVALIDA | VALIDACION:<msg> | HTTP <n>
   const llamarReservasWeb = async (payload) => {
-    const response = await fetchWithTimeout(RESERVAS_WEB_URL, {
+    const response = await fetchWithTimeout(RESERVAS_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', apikey: SUPABASE_ANON_KEY },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload)
     })
 

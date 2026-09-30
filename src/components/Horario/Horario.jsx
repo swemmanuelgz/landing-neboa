@@ -5,39 +5,19 @@ import './Horario.css'
 // Orden de columnas: Lunes→Sábado→Domingo (como en el diseño original)
 const DIAS_DISPLAY_ORDER = [1, 2, 3, 4, 5, 6, 0]
 
-// Filas fijas de la tabla y si pertenecen al turno de cenas
+// Filas de la tabla: turnos de reserva de nexum-restaurant (no hay horas de apertura/cierre del local).
 const TABLE_ROWS = [
   {
-    label: 'APERTURA COMIDAS',
-    isDinner: false,
-    getValue: (c) => formatTime(c.apertura_comidas),
-  },
-  {
-    label: 'Horario cocina (comidas)',
+    label: 'Comidas',
     isDinner: false,
     getValue: (c) =>
-      `${formatTime(c.turno_mediodia_inicio)}-${formatTime(c.turno_mediodia_fin)}`,
+      c.turno_mediodia_inicio ? `${formatTime(c.turno_mediodia_inicio)}-${formatTime(c.turno_mediodia_fin)}` : '',
   },
   {
-    label: 'CIERRE COMIDAS',
-    isDinner: false,
-    getValue: (c) => formatTime(c.cierre_comidas),
-  },
-  {
-    label: 'APERTURA CENAS',
-    isDinner: true,
-    getValue: (c) => formatTime(c.apertura_cenas),
-  },
-  {
-    label: 'Horario cocina (cenas)',
+    label: 'Cenas',
     isDinner: true,
     getValue: (c) =>
-      `${formatTime(c.turno_noche_inicio)}-${formatTime(c.turno_noche_fin)}`,
-  },
-  {
-    label: 'CIERRE NOCHE',
-    isDinner: true,
-    getValue: (c) => formatTime(c.cierre_noche),
+      c.turno_noche_inicio ? `${formatTime(c.turno_noche_inicio)}-${formatTime(c.turno_noche_fin)}` : '',
   },
 ]
 
@@ -45,6 +25,17 @@ const Horario = () => {
   const { horariosPorDia, configuracion, loading, error } = useHorario()
 
   const diasOrdenados = DIAS_DISPLAY_ORDER.map((d) => horariosPorDia?.get(d)).filter(Boolean)
+
+  const filas = configuracion ? TABLE_ROWS.filter((row) => row.getValue(configuracion)) : []
+
+  // Días que abren también por la noche (p. ej. "viernes y sábado").
+  const diasConCena = DIAS_DISPLAY_ORDER
+    .map((d) => horariosPorDia?.get(d))
+    .filter((d) => d && !d.cerrado && !d.solo_mediodia)
+    .map((d) => d.nombre.toLowerCase())
+  const textoDiasCena = diasConCena.length > 1
+    ? `${diasConCena.slice(0, -1).join(', ')} y ${diasConCena[diasConCena.length - 1]}`
+    : diasConCena[0] || ''
 
   const diasCerradosNombres = horariosPorDia
     ? DIAS_DISPLAY_ORDER
@@ -55,14 +46,17 @@ const Horario = () => {
     : ''
 
   const turnoInfo =
-    configuracion
-      ? `(Horario de cocina) ${formatTime(configuracion.turno_mediodia_inicio)}-${formatTime(configuracion.turno_mediodia_fin)} · ${formatTime(configuracion.turno_noche_inicio)}-${formatTime(configuracion.turno_noche_fin)} (viernes y sábado).`
+    configuracion?.turno_mediodia_inicio
+      ? `Reservas: comidas ${formatTime(configuracion.turno_mediodia_inicio)}-${formatTime(configuracion.turno_mediodia_fin)}` +
+        (configuracion.turno_noche_inicio
+          ? ` · cenas ${formatTime(configuracion.turno_noche_inicio)}-${formatTime(configuracion.turno_noche_fin)}${textoDiasCena ? ` (${textoDiasCena})` : ''}.`
+          : '.')
       : ''
 
   return (
     <section className="horario-section">
       <ScrollReveal animation="fade-up">
-        <h2>Horario</h2>
+        <h2>Horario de reservas</h2>
       </ScrollReveal>
 
       <ScrollReveal animation="fade-up" delay={0.2}>
@@ -82,7 +76,7 @@ const Horario = () => {
                 </tr>
               </thead>
               <tbody>
-                {TABLE_ROWS.map((row) => (
+                {filas.map((row) => (
                   <tr key={row.label}>
                     <td className="label">{row.label}</td>
                     {diasOrdenados.map((dia) => {
