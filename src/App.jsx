@@ -1,57 +1,15 @@
-import { lazy, Suspense, useEffect } from 'react'
-import { Routes, Route, useNavigate } from 'react-router-dom'
 import LandingPage from './pages/LandingPage'
-import ProtectedRoute, { RoleRoute } from './components/ProtectedRoute/ProtectedRoute'
-import { useAuth } from './contexts/AuthContext'
+import { Navigate, Route, Routes } from 'react-router-dom'
 import './styles/variables.css'
 
-const Login = lazy(() => import('./pages/Login'))
-const SetPassword = lazy(() => import('./pages/SetPassword'))
-const DashboardLayout = lazy(() => import('./pages/dashboard/DashboardLayout'))
-const ReservasDash = lazy(() => import('./pages/dashboard/ReservasDash'))
-const ReservasHoy = lazy(() => import('./pages/dashboard/ReservasHoy'))
-const Estadisticas = lazy(() => import('./pages/dashboard/Estadisticas'))
-const Usuarios = lazy(() => import('./pages/dashboard/Usuarios'))
-const Llamadas = lazy(() => import('./pages/dashboard/Llamadas'))
-const Perfil = lazy(() => import('./pages/dashboard/Perfil'))
-const Horarios = lazy(() => import('./pages/dashboard/Horarios'))
-const DevSettings = lazy(() => import('./pages/dashboard/DevSettings'))
-
+// Solo queda la landing pública. El antiguo /login + /dashboard (Supabase viejo) se retiró:
+// el personal usa el panel /app de nexum-restaurant. Las rutas viejas vuelven a la portada.
 function App() {
-  const navigate = useNavigate()
-  const { needsPasswordSetup } = useAuth()
-
-  // Redirect to /set-password when AuthContext signals an invite/recovery flow.
-  // Fires for both hash-flow (desktop legacy) and PKCE ?code= flow (mobile/modern).
-  useEffect(() => {
-    if (needsPasswordSetup) {
-      navigate('/set-password', { replace: true })
-    }
-  }, [needsPasswordSetup, navigate])
-
   return (
-    <Suspense fallback={<div style={{ minHeight: '100dvh', background: '#2a2a2a' }} />}>
-      <Routes>
-        <Route path="/" element={<LandingPage />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/set-password" element={<SetPassword />} />
-        <Route element={<ProtectedRoute />}>
-          <Route path="/dashboard" element={<DashboardLayout />}>
-            <Route index element={<ReservasDash />} />
-            <Route path="reservas" element={<ReservasDash />} />
-            <Route path="hoy" element={<ReservasHoy />} />
-            <Route path="estadisticas" element={<Estadisticas />} />
-            <Route path="llamadas" element={<Llamadas />} />
-            <Route path="perfil" element={<Perfil />} />
-            <Route element={<RoleRoute allowed={['admin', 'developer']} />}>
-              <Route path="usuarios" element={<Usuarios />} />
-              <Route path="horarios" element={<Horarios />} />
-              <Route path="dev" element={<DevSettings />} />
-            </Route>
-          </Route>
-        </Route>
-      </Routes>
-    </Suspense>
+    <Routes>
+      <Route path="/" element={<LandingPage />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   )
 }
 
