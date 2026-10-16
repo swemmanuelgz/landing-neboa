@@ -2,13 +2,6 @@ import { useState, useEffect } from 'react'
 import ScrollReveal from '../ScrollReveal/ScrollReveal'
 import './Galeria.css'
 
-// Imágenes desayunos
-import fotoDesayuno from '../../img/foto_desayuno.jpg'
-import fotoDesayuno2 from '../../img/foto_desayuno2.png'
-import fotoDesayuno3 from '../../img/foto_desayuno3.png'
-import fotoDesayuno4 from '../../img/foto_desayuno4.png'
-import fotoDesayuno5 from '../../img/foto_desayuno5.png'
-
 // Imágenes sala
 import fotoSala from '../../img/foto_sala.png'
 import fotoSofa from '../../img/foto_sofa.png'
@@ -61,18 +54,11 @@ const Carrusel = ({ slides, title, interval = 4000, altPrefix, className = '' })
 }
 
 const Galeria = () => {
-  const desayunosSlides = [fotoDesayuno, fotoDesayuno2, fotoDesayuno3, fotoDesayuno4, fotoDesayuno5]
   const salaSlides = [fotoSala, fotoSofa, fotoPlatos, fotoMaquinaCerveza]
   const especialidadesSlides = [pulpo, fotoCarne, fotoVinos, fotoCocteles]
 
   return (
     <div id="galeria">
-      <Carrusel 
-        slides={desayunosSlides} 
-        title="Nuestros Desayunos" 
-        interval={4000} 
-        altPrefix="Desayuno" 
-      />
       <Carrusel 
         slides={salaSlides} 
         title="Nuestro Espacio" 
